@@ -297,13 +297,13 @@ namespace patterns
 		class Glyph
 		{
 		public:
-			virtual void draw(Window* w);
-			virtual void bounds(Rect& r);
-			virtual bool intersects(const Point& p);
-			virtual void insert(Glyph* g, int i);
-			virtual void remove(Glyph* g);
-			virtual Glyph* child(int i);
-			virtual Glyph* parent();
+			virtual void draw(Window* w){};
+			virtual void bounds(Rect& r){};
+			virtual bool intersects(const Point& p){ return false; };
+			virtual void insert(Glyph* g, int i){};
+			virtual void remove(Glyph* g){};
+			virtual Glyph* child(int i){ return nullptr; };
+			virtual Glyph* parent(){ return nullptr; };
 		};
 
 		class Rectangle : public Glyph
@@ -335,6 +335,38 @@ namespace patterns
 		public:
 			void draw(Window* w) override;
 			bool intersects(const Point& p) override;
+		};
+
+		class Compositor;
+
+		class Composition : public Glyph
+		{
+		public:
+			Composition(Compositor* compositor);
+
+			void insert(Glyph* g, int i) override;
+
+		private:
+			Compositor* mCompositor;
+			// contains all visible glyphs.!!!
+		};
+
+		class Compositor
+		{
+		public:
+			void setComposition(Composition* c)
+			{
+				mComposition = c;
+			};
+			virtual void Compose(){};
+		private:
+			Composition* mComposition;
+		};
+
+		class SimpleCompositor : public Compositor
+		{
+		public:
+			void Compose() override;
 		};
 	}
 
@@ -604,6 +636,77 @@ namespace patterns
 
 		// Related:
 		// - flyweight
+
+		
+	}
+
+	namespace chapter6
+	{
+		void main();
+
+		// additional info
+
+		// Template method
+		class Algorithm
+		{
+		public:
+			virtual ~Algorithm();
+			void doWork();
+			
+		protected:
+			virtual void doPart1();
+			virtual void doPart2();
+			virtual void doPart3();
+		};
+
+		class MyAlgorithm : public Algorithm
+		{
+		protected:
+			void doPart1() override;
+		};
+
+		// Alternatives to virtual functions:
+		class GameCharacter
+		{
+		public:
+			virtual void healthValue() const; 
+		};
+		// Template method with non virtual interface.
+		class GameCharacter1
+		{
+		public:
+			void healthValue();
+		protected:
+			virtual void doHealthValue() const;
+		};
+		// Strategy with function pointers
+		class GameCharacter2;
+
+		int defaultHealthCalc(const GameCharacter2& gc);
+
+		class GameCharacter2
+		{
+		public:
+			typedef int(*HealthCalcFunc)(const GameCharacter2& gc);
+
+			explicit GameCharacter2(HealthCalcFunc hfc = defaultHealthCalc)
+				:healthFunc(hfc)
+			{
+			}
+
+			int healthValue() const
+			{
+				return healthFunc(*this);
+			}
+
+		private:
+			HealthCalcFunc healthFunc;
+		};
+
+		// different objects can have different calculation function.
+		// it can be changed in runtime.
+
+		// pattern Strategy usinng std::function.(!!!)
 	}
 }
 

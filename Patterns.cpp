@@ -15,6 +15,7 @@ namespace patterns
 		chapter2::main();
 //		chapter4::main();
 //		chapter5::main();
+		chapter6::main();
 	}
 
 	namespace chapter1
@@ -234,6 +235,19 @@ namespace patterns
 		{
 			w->drawRect();
 		}
+
+		// Composition
+		Composition::Composition(Compositor* compositor)
+			:mCompositor(compositor)
+		{
+			mCompositor->setComposition(this);
+		}
+
+		void Composition::insert(Glyph* g, int i)
+		{
+			Glyph::insert(g, i);
+			mCompositor->Compose();
+		}
 	}
 
 	namespace chapter4
@@ -374,6 +388,37 @@ namespace patterns
 		void Composition::repair()
 		{
 			mCompositor->Compose();
+		}
+	}
+
+	namespace chapter6
+	{
+		void main()
+		{
+
+		}
+
+		// Template method
+		void Algorithm::doWork()
+		{
+			doPart1();
+			doPart2();
+			doPart3();
+		}
+
+		void Algorithm::doPart1()
+		{
+
+		}
+
+		void Algorithm::doPart2()
+		{
+
+		}
+
+		void Algorithm::doPart3()
+		{
+
 		}
 	}
 }
