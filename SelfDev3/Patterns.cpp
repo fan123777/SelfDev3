@@ -4,6 +4,7 @@
 #include <sstream> // stringstream
 #include <iomanip> // put_time
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -222,19 +223,163 @@ namespace patterns
 	{
 		void main()
 		{
+			Window w;
 
+			// Composite
+			Row row;
+			shared_ptr<Character> c1(new Character('a'));
+
+			shared_ptr<Polygon> p(new Polygon);
+			shared_ptr<Character> c2(new Character('b'));
+			shared_ptr<Character> c3(new Character('c'));
+ 			p->insert(c2, 0);
+			p->insert(c3, 1);
+
+			row.insert(c1, 0);
+			row.insert(p, 1);
+
+			row.draw(&w);
 		}
 
 		// Window
-		void Window::drawRect()
+		void Window::drawRect(Glyph* g)
 		{
+			cout << "Window::drawRect" << endl;
+		}
+
+		void Window::drawGlyph(Glyph* g)
+		{
+			cout << "Window::drawGlyph" << endl;
+		}
+
+		void Window::drawCharacter(Character* g)
+		{
+			cout << "Window::drawCharacter(" << g->c() << ")" << endl;
+		}
+
+		// Glyph
+		void Glyph::draw(Window* w)
+		{
+			w->drawGlyph(this);
+			cout << "" << endl;
+		}
+
+		void Glyph::bounds(Rect& r)
+		{
+			cout << " Glyph::draw" << endl;
+		}
+
+		bool Glyph::intersects(const Point& p)
+		{
+			cout << "Glyph::intersects" << endl;
+			return false;
+		}
+
+		void Glyph::insert(ElementType g, int position)
+		{
+			cout << "Glyph::insert" << endl;
+		}
+
+		void Glyph::remove(int position)
+		{
+			cout << "Glyph::remove" << endl;
+		}
+
+		std::shared_ptr<Glyph> Glyph::child(int position)
+		{
+			cout << "Glyph::child" << endl;
+			return nullptr;
+		}
+
+		std::shared_ptr<Glyph> Glyph::parent()
+		{
+			cout << "Glyph::parent" << endl;
+			return nullptr;
+		}
+
+		// Character
+		Character::Character(char c)
+			:mC(c)
+		{}
+
+		void Character::draw(Window* w)
+		{
+			w->drawCharacter(this);
+		}
+
+		char Character::c()
+		{
+			return mC;
 		}
 
 		// Rectangle
 		void Rectangle::draw(Window* w)
 		{
-			w->drawRect();
+			w->drawRect(this);
 		}
+
+		// Composite
+		Composite::Composite()
+			:mParent(nullptr)
+		{
+
+		}
+
+		void Composite::draw(Window* w)
+		{
+			cout << "Composite::draw" << endl;
+			for (auto& child : mChildren)
+				child->draw(w);
+		}
+
+		void Composite::insert(ElementType g, int position)
+		{
+			cout << "Composite::insert" << endl;
+			assert(position >= 0 && position <= mChildren.size());
+			mChildren.insert (mChildren.begin() + position, g);
+		}
+
+		void Composite::remove(int position)
+		{
+			cout << "Composite::remove" << endl;
+			assert(position >= 0 && position <= mChildren.size());
+			mChildren.erase(mChildren.begin() + position);
+		}
+
+		ElementType Composite::child(int position)
+		{
+			cout << "Composite::child" << endl;
+			assert(position >= 0 && position <= mChildren.size());
+			return mChildren[position];
+		}
+
+		ElementType Composite::parent()
+		{
+			cout << "Composite::parent" << endl;
+			return mParent;
+		}
+
+		// Row
+		void Row::draw(Window* w)
+		{
+			cout << "Row::draw" << endl;
+			Composite::draw(w);
+		}
+
+		void Row::insert(ElementType g, int position)
+		{
+			cout << "Row::insert" << endl;
+			Composite::insert(g, position);
+		}
+
+		// Polygon
+		void Polygon::draw(Window* w)
+		{
+			cout << "Polygon::draw" << endl;
+			Composite::draw(w);
+		}
+
+		// ***
 
 		// Composition
 		Composition::Composition(Compositor* compositor)
@@ -243,9 +388,9 @@ namespace patterns
 			mCompositor->setComposition(this);
 		}
 
-		void Composition::insert(Glyph* g, int i)
+		void Composition::insert(ElementType g, int position)
 		{
-			Glyph::insert(g, i);
+			Glyph::insert(g, position);
 			mCompositor->Compose();
 		}
 	}

@@ -9,6 +9,8 @@
 #include <atomic>
 #include <mutex>
 #include <thread>
+#include <vector>
+#include <memory>
 
 namespace patterns
 {
@@ -118,7 +120,7 @@ namespace patterns
 	// Huge OOP applications are made of layers of frameworks.
 
 	// to do:
-	// - MVC model+:  Observer+, Composite+, Strategy+(!!!). Practice with MVC!!!
+	// - MVC model+:  Observer+, Composite+, Strategy+. Practice with MVC
 	// - reasons for redisigning (Planning for future changes)
 	// - main rules of OOP
 	// - inheritance, composition, delegating.
@@ -278,10 +280,15 @@ namespace patterns
 		// structure of the document
 		// recursive composition
 
+		class Glyph;
+		class Character;
+		
 		class Window
 		{
 		public:
-			void drawRect();
+			void drawGlyph(Glyph* g);
+			void drawRect(Glyph* g);
+			void drawCharacter(Character* g);
 		};
 
 		class Rect
@@ -294,16 +301,20 @@ namespace patterns
 
 		};
 
+		typedef std::shared_ptr<Glyph> ElementType;
+		typedef std::vector<std::shared_ptr<Glyph>> ContainerType;
+		typedef std::vector<std::shared_ptr<Glyph>>::iterator ContainerIteratorType;
+
 		class Glyph
 		{
 		public:
-			virtual void draw(Window* w){};
-			virtual void bounds(Rect& r){};
-			virtual bool intersects(const Point& p){ return false; };
-			virtual void insert(Glyph* g, int i){};
-			virtual void remove(Glyph* g){};
-			virtual Glyph* child(int i){ return nullptr; };
-			virtual Glyph* parent(){ return nullptr; };
+			virtual void draw(Window* w);
+			virtual void bounds(Rect& r);
+			virtual bool intersects(const Point& p);
+			virtual void insert(ElementType g, int position);
+			virtual void remove(int poosition);
+			virtual ElementType child(int position);
+			virtual ElementType parent();
 		};
 
 		class Rectangle : public Glyph
@@ -316,27 +327,46 @@ namespace patterns
 		class Character : public Glyph
 		{
 		public:
+			Character(char c);
+
 			void draw(Window* w) override;
-			bool intersects(const Point& p) override;
+
+			char c();
+
 		private:
-			char c;
+			char mC;
 		};
 
-		class Row : public Glyph
+		class Composite : public Glyph
+		{
+		public:
+			Composite();
+
+			void draw(Window* w) override;
+			void insert(ElementType g, int position) override;
+			void remove(int position) override;
+			ElementType child(int position) override;
+			ElementType parent() override;
+
+		private:
+			ContainerType mChildren;
+			ElementType mParent;
+		};
+
+		class Row : public Composite
 		{
 		public:
 			void draw(Window* w) override;
-			bool intersects(const Point& p) override;
-			void insert(Glyph* g, int i) override;
+			void insert(ElementType g, int position) override;
 		};
 
-		class Polygon : public Glyph
+		class Polygon : public Composite
 		{
 		public:
 			void draw(Window* w) override;
-			bool intersects(const Point& p) override;
 		};
 
+		// ***
 		class Compositor;
 
 		class Composition : public Glyph
@@ -344,11 +374,11 @@ namespace patterns
 		public:
 			Composition(Compositor* compositor);
 
-			void insert(Glyph* g, int i) override;
+			void insert(std::shared_ptr<Glyph> g, int position) override;
 
 		private:
 			Compositor* mCompositor;
-			// contains all visible glyphs.!!!
+			// contains all visible glyphs.
 		};
 
 		class Compositor
@@ -457,7 +487,7 @@ namespace patterns
 		// - chain of responsibilities
 		// - decorator
 		// - visitor
-		// !!! practise with composite
+		// practise with composite
 	}
 
 	namespace chapter5
@@ -637,6 +667,11 @@ namespace patterns
 		// Related:
 		// - flyweight
 
+		//TODO: practice with:
+		// Composite +
+		// Strategy: ...
+		// Observer: ...
+		// MVC: ...
 		
 	}
 
@@ -706,7 +741,55 @@ namespace patterns
 		// different objects can have different calculation function.
 		// it can be changed in runtime.
 
-		// pattern Strategy usinng std::function.(!!!)
+		// pattern Strategy usinng std::function.
+		class GameCharacter3
+		{
+		public:
+			typedef std::function<int(const GameCharacter3&)> HealthCalcFunc;
+			explicit GameCharacter3(HealthCalcFunc hfc = defaultHealthCalc)
+				:healthFunc(hfc)
+			{
+			}
+
+			int healthValue() const
+			{
+				return healthFunc(*this);
+			}
+
+		private:
+			HealthCalcFunc healthFunc;
+		};
+
+		// classical Strategy
+		class GameCharacter4;
+
+		class HealthCalcFunc
+		{
+		public:
+			virtual int calc(const GameCharacter4& gc) const;
+		};
+
+		class MyHcf : public HealthCalcFunc
+		{
+		public:
+			int calc(const GameCharacter4& gc) const override;
+		};
+
+		class GameCharacter4
+		{
+		public:
+			explicit GameCharacter4(HealthCalcFunc* hcf)
+				:mHcf(hcf)
+			{}
+
+			int healthValue() const
+			{
+				return mHcf->calc(*this);
+			}
+
+		private:
+			HealthCalcFunc* mHcf;
+		};
 	}
 }
 
