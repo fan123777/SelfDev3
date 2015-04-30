@@ -280,6 +280,7 @@ namespace patterns
 		// structure of the document
 		// recursive composition
 
+		//*** Composite
 		class Glyph;
 		class Character;
 		
@@ -366,7 +367,7 @@ namespace patterns
 			void draw(Window* w) override;
 		};
 
-		// ***
+		//*** Strategy
 		class Compositor;
 
 		class Composition : public Glyph
@@ -398,6 +399,155 @@ namespace patterns
 		public:
 			void Compose() override;
 		};
+
+		//*** Decorator
+		class MonoGlyph : public Glyph
+		{
+		public:
+			MonoGlyph(Glyph* component);
+			void draw(Window* w) override;
+		private:
+			Glyph* mComponent;
+		};
+
+		class Border :public MonoGlyph
+		{
+		public:
+			void draw(Window* w) override;
+		private:
+			void drawBorder(Window* w);
+		};
+
+		class Scroller :public MonoGlyph
+		{
+			
+		};
+
+	}
+
+	namespace chapter3
+	{
+		void main();
+
+		enum DirectionEnum
+		{
+			North = 0,
+			South = 1,
+			East = 2,
+			West = 3
+		};
+
+		class MapSite
+		{
+		public:
+			virtual void enter() = 0;
+		};
+
+		class Room : public MapSite
+		{
+		public:
+			Room(int roomNo);
+
+			MapSite* GetSide(DirectionEnum direction) const;
+			void setSide(DirectionEnum direction, MapSite* ms);
+
+			void enter() override;
+		private:
+			MapSite* mSides[4];
+			int mRoomNumber;
+		};
+
+		class Wall : public MapSite
+		{
+		public:
+
+			void enter() override;
+		};
+
+		class Door : public MapSite
+		{
+		public:
+			Door(Room* r1 = nullptr, Room* r2 = nullptr);
+
+			void enter() override;
+			Room* otherSideFromRoom(Room* other);
+
+		private:
+			Room* mRoom1;
+			Room* mRoom2;
+			bool mIsOpen;
+		};
+
+		class Maze
+		{
+		public:
+			void AddRoom(Room* room);
+			Room* roomNo(int) const;
+		private:
+		};
+
+		class MazeFactory;
+
+		class MazeGame
+		{
+		public:
+			Maze* CreateMaze();
+			Maze* CreateMaze(const MazeFactory& factory);
+		};
+
+		// Abstract Factory
+		// Kit
+		// Use when:
+		// - the system should not depend on how created, assembled and presented to its constituent objects
+		// - belonging to a family of related facilities should be used together, and you need to enforce this restriction;
+		// - the system must be configured with one of the families of its constituent facilities;
+		// - you want to present a library of objects, revealing only their interfaces, but not the implementation.
+		// Results:
+		// - isolates concrete classes.
+		// - simplifies the replacement product families.
+		// - ensure compatibility of products
+		// - support a new kind of product is difficult.
+		// Realisation:
+		// - factory as objects that exist in a single copy.
+		// - creating products.
+		// - definition extensible factories.
+
+		class MazeFactory
+		{
+		public:
+			MazeFactory();
+
+			virtual Maze* makeMaze() const;
+			virtual Wall* makeWall() const;
+			virtual Room* makeRoom(int n) const;
+			virtual Door* makeDoor(Room* r1, Room* r2) const;
+		};
+
+		class EnchantedMazeFactory : public MazeFactory
+		{
+		public:
+			EnchantedMazeFactory();
+
+			Room* makeRoom(int n) const override;
+			Door* makeDoor(Room* r1, Room* r2) const override;
+
+		private:
+			int castSpell() const;
+
+		};
+
+		class EnchantedRoom:public Room
+		{
+		public:
+			EnchantedRoom(int n, int s);
+		};
+
+		class DoorNeedingSpell:public Door
+		{
+		public:
+			DoorNeedingSpell(Room* r1 = nullptr, Room* r2 = nullptr);
+		};
+
 	}
 
 	namespace chapter4
@@ -488,6 +638,58 @@ namespace patterns
 		// - decorator
 		// - visitor
 		// practise with composite
+
+		// ----------Decorator----------
+		// Wrapper
+		// Use when:
+		// - dynamically add new functionality (transparent to the client)
+		// - to implement responsibilities
+		// - when making subclasses is not convinient or possible.
+		// Results:
+		// +:
+		// - more flexible then inheritance.
+		// - avoids an overloaded function classes on the upper levels hierarchy.
+		// -:
+		// - decorator and its component aren't equel
+		// - lots of small objects
+		// Realisation
+		// - interfaces of decorator and component must be equal.
+		// - if only 1 additional functionality - no need in abstract decorator class.
+		// - Component classes lightweight, component class should be interface.
+		// - changes in appearance, but not the internal structure of the object.
+		// - decorators are transparent for components.
+
+		class VisualComponent
+		{
+		public:
+			virtual ~VisualComponent();
+
+			virtual void draw();
+			virtual void resize();
+		};
+
+		class Decorator :public VisualComponent
+		{
+		public:
+			Decorator(VisualComponent* vc);
+			void draw() override;
+			void resize() override;
+		private:
+			VisualComponent* mComponent;
+		};
+
+		class BorderDecorator : public Decorator
+		{
+		public:
+			BorderDecorator(VisualComponent* vc, int width);
+			void draw() override;
+		private:
+			void drawBorder(int width);
+			int mWidth;
+		};
+
+		// Related patterns:
+		// - adapter, compositor, strategy.
 	}
 
 	namespace chapter5
@@ -615,6 +817,11 @@ namespace patterns
 		class Compositor;
 		class Component;
 
+		class Coord
+		{
+
+		};
+
 		class Composition
 		{
 		public:
@@ -623,16 +830,11 @@ namespace patterns
 
 		private:
 			Compositor * mCompositor;
-			Component* mComponents;
+			std::list<Component*> mComponents;
 			int mComponentCount;
 			int mLineWidth;
 			int mLineBreaks;
 			int mLineCount;
-		};
-
-		class Coord
-		{
-
 		};
 
 		class Compositor
@@ -672,7 +874,6 @@ namespace patterns
 		// Strategy: ...
 		// Observer: ...
 		// MVC: ...
-		
 	}
 
 	namespace chapter6

@@ -14,7 +14,8 @@ namespace patterns
 	{
 //		chapter1::main();
 		chapter2::main();
-//		chapter4::main();
+		chapter3::main();
+		chapter4::main();
 //		chapter5::main();
 		chapter6::main();
 	}
@@ -225,7 +226,7 @@ namespace patterns
 		{
 			Window w;
 
-			// Composite
+			//*** Composite
 			Row row;
 			shared_ptr<Character> c1(new Character('a'));
 
@@ -239,8 +240,11 @@ namespace patterns
 			row.insert(p, 1);
 
 			row.draw(&w);
+
+			// Strategy...
 		}
 
+		//*** Composite
 		// Window
 		void Window::drawRect(Glyph* g)
 		{
@@ -379,7 +383,7 @@ namespace patterns
 			Composite::draw(w);
 		}
 
-		// ***
+		// ***Strategy
 
 		// Composition
 		Composition::Composition(Compositor* compositor)
@@ -393,13 +397,188 @@ namespace patterns
 			Glyph::insert(g, position);
 			mCompositor->Compose();
 		}
+
+		//*** Decorator
+		// MonoGlyph
+		MonoGlyph::MonoGlyph(Glyph* component)
+			:mComponent(component)
+		{
+		}
+
+		void MonoGlyph::draw(Window* w)
+		{
+			mComponent->draw(w);
+		}
+
+		// Border
+		void Border::draw(Window* w)
+		{
+			MonoGlyph::draw(w);
+			drawBorder(w);
+		}
+
+		void Border::drawBorder(Window* w)
+		{
+
+		}
+	}
+
+	namespace chapter3
+	{
+		void main()
+		{
+
+		}
+		// Room
+		Room::Room(int roomNo)
+			:mRoomNumber(roomNo)
+		{
+
+		}
+
+		void Room::setSide(DirectionEnum direction, MapSite* ms)
+		{
+			mSides[direction] = ms;
+		}
+
+		void Room::enter()
+		{
+
+		}
+
+		// Wall
+		void Wall::enter()
+		{
+
+		}
+
+		// Door
+		Door::Door(Room* r1, Room* r2)
+			:mRoom1(r1),
+			mRoom2(r2)
+		{
+
+		}
+
+		void Door::enter()
+		{
+
+		}
+
+		// Maze
+		void Maze::AddRoom(Room* room)
+		{
+
+		}
+
+		// MazeGame
+		Maze* MazeGame::CreateMaze()
+		{
+			Maze* aMaze = new Maze;
+
+			Room* r1 = new Room(1);
+			Room* r2 = new Room(2);
+			Door* theDoor = new Door(r1, r2);
+
+			aMaze->AddRoom(r1);
+			aMaze->AddRoom(r2);
+
+			r1->setSide(North, new Wall);
+			r1->setSide(East, theDoor);
+			r1->setSide(South, new Wall);
+			r1->setSide(West, new Wall);
+
+			return aMaze;
+		}
+
+		// MazeFactory
+		MazeFactory::MazeFactory()
+		{
+
+		}
+
+		Maze* MazeFactory::makeMaze() const
+		{
+			return new Maze;
+		}
+
+		Wall* MazeFactory::makeWall() const
+		{
+			return new Wall;
+		}
+
+		Room* MazeFactory::makeRoom(int n) const
+		{
+			return new Room(n);
+		}
+
+		Door* MazeFactory::makeDoor(Room* r1, Room* r2) const
+		{
+			return new Door(r1, r2);
+		}
+
+		Maze* MazeGame::CreateMaze(const MazeFactory& factory)
+		{
+			Maze* aMaze = factory.makeMaze();
+
+			Room* r1 = factory.makeRoom(1);
+			Room* r2 = factory.makeRoom(2);
+			Door* theDoor = factory.makeDoor(r1, r2);
+
+			aMaze->AddRoom(r1);
+			aMaze->AddRoom(r2);
+
+			r1->setSide(North, new Wall);
+			r1->setSide(East, theDoor);
+			r1->setSide(South, new Wall);
+			r1->setSide(West, new Wall);
+
+			return aMaze;
+		}
+
+		// EnchantedMazeFactory
+		EnchantedMazeFactory::EnchantedMazeFactory()
+		{
+
+		}
+
+		Room* EnchantedMazeFactory::makeRoom(int n) const
+		{
+			return new EnchantedRoom(n, castSpell());
+		}
+
+		int EnchantedMazeFactory::castSpell() const
+		{
+			return 0;
+		}
+
+		Door* EnchantedMazeFactory::makeDoor(Room* r1, Room* r2) const
+		{
+			return new DoorNeedingSpell(r1, r2);
+		}
+
+		EnchantedRoom::EnchantedRoom(int n, int s)
+			:Room(n)
+		{
+
+		}
+
+				DoorNeedingSpell::DoorNeedingSpell(Room* r1, Room* r2)
+		{
+
+		}
+		
 	}
 
 	namespace chapter4
 	{
 		void main()
 		{
-
+			// Decorator
+			VisualComponent* vc = new VisualComponent;
+			VisualComponent* borderedVCs = new BorderDecorator(vc, 5);
+			delete borderedVCs;
+			delete vc;
 		}
 
 		// CompositeEquipment
@@ -409,6 +588,60 @@ namespace patterns
 			for (auto& item : mEquipment)
 				total += item->netPrice();
 			return total;
+		}
+
+		// Decorator
+		// VisualComponent
+		VisualComponent::~VisualComponent()
+		{
+
+		}
+
+		void VisualComponent::draw()
+		{
+			cout << "VisualComponent::draw()\n";
+		}
+
+		void VisualComponent::resize()
+		{
+			cout << "VisualComponent::resize()\n";
+		}
+
+		// Decorator
+		Decorator::Decorator(VisualComponent* vc)
+			:mComponent(vc)
+		{
+		}
+
+		void Decorator::draw()
+		{
+			cout << "Decorator::draw()\n";
+			mComponent->draw();
+		}
+
+		void Decorator::resize()
+		{
+			cout << "Decorator::resize()\n";
+			mComponent->draw();
+		}
+
+		// BorderDecorator
+		BorderDecorator::BorderDecorator(VisualComponent* vc, int width)
+			:Decorator(vc),
+			mWidth(width)
+		{
+		}
+
+		void BorderDecorator::draw()
+		{
+			cout << "BorderDecorator::draw()\n";
+			Decorator::draw();
+			drawBorder(mWidth);
+		}
+	
+		void BorderDecorator::drawBorder(int width)
+		{
+			cout << "BorderDecorator::drawBorder()\n";
 		}
 
 	}
