@@ -242,6 +242,14 @@ namespace patterns
 			row.draw(&w);
 
 			// Strategy...
+
+			// Iterator
+			Glyph* g = new Glyph;
+			Iterator<Glyph>* i = g->createIterator();
+			for (i->first(); !i->isDone(); i->next())
+			{
+				Glyph* child = i->getCurrent();
+			}
 		}
 
 		//*** Composite
@@ -421,6 +429,17 @@ namespace patterns
 		{
 
 		}
+
+		void ApplicationWindow::drawContents()
+		{
+
+		}
+
+		// MenuItem
+		void MenuItem::clicked()
+		{
+			mCommand->execute();
+		}
 	}
 
 	namespace chapter3
@@ -563,7 +582,7 @@ namespace patterns
 
 		}
 
-				DoorNeedingSpell::DoorNeedingSpell(Room* r1, Room* r2)
+		DoorNeedingSpell::DoorNeedingSpell(Room* r1, Room* r2)
 		{
 
 		}
@@ -643,7 +662,6 @@ namespace patterns
 		{
 			cout << "BorderDecorator::drawBorder()\n";
 		}
-
 	}
 
 	namespace chapter5
@@ -661,6 +679,11 @@ namespace patterns
 //			Composition* quick = new Composition(new SimpleCompositor);
 //			Composition* slick = new Composition(new TeXCompositor);
 //			Composition* iconic = new Composition(new ArrayCompositor(100));
+
+			// Commnad
+			//MyClass receiver;
+			//Command* c = new SimpleCommand<MyClass>(receiver, &MyClass::action);
+			// c->execute;
 		}
 
 		// Observer
@@ -766,6 +789,41 @@ namespace patterns
 		void Composition::repair()
 		{
 			mCompositor->Compose();
+		}
+
+		// Command
+		OpenCommand::OpenCommand(Application* app)
+			:mApplication(app)
+		{
+
+		}
+
+		void OpenCommand::execute()
+		{
+			string name = askUser();
+			if (name.empty() == false)
+			{
+				Document* document = new Document(name);
+				mApplication->addDocument(document);
+				document->open();
+			}
+		}
+
+		const std::string& OpenCommand::askUser()
+		{
+			return mResponse;
+		}
+
+		// PasteCommand
+		PasteCommand::PasteCommand(Document* document)
+			:mDocument(document)
+		{
+
+		}
+
+		void PasteCommand::execute()
+		{
+			mDocument->paste();
 		}
 	}
 

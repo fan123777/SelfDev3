@@ -284,12 +284,31 @@ namespace patterns
 		class Glyph;
 		class Character;
 		
+		// Bridge
+		class WindowImpl;
+		class View;
+
 		class Window
 		{
 		public:
+			// control Windows
+			virtual void redraw(){};
+			virtual void raise(){};
+			virtual void lower(){};
+			virtual void iconify(){};
+			virtual void deiconify(){};
+
+			// graphics
+			virtual void drawLine(){};
 			void drawGlyph(Glyph* g);
 			void drawRect(Glyph* g);
 			void drawCharacter(Character* g);
+		protected:
+			WindowImpl* getWindowImp();
+			View* getView();
+		private:
+			WindowImpl* mImp;
+			View* mView;
 		};
 
 		class Rect
@@ -306,6 +325,80 @@ namespace patterns
 		typedef std::vector<std::shared_ptr<Glyph>> ContainerType;
 		typedef std::vector<std::shared_ptr<Glyph>>::iterator ContainerIteratorType;
 
+		enum TraversalEnum
+		{
+			TraversalChildren = 0,
+			TraversalPreorder = 1,
+			TraversalPostOrder = 2,
+			TraversalInorder = 3
+		};
+
+		// Iterator
+		template<typename T>
+		class Iterator
+		{
+		public:
+			virtual void first() = 0;
+			virtual void next() = 0;
+			virtual bool isDone() = 0;
+			virtual T* getCurrent() = 0;
+		};
+
+		template<typename T>
+		class PreorderIterator : public Iterator<T>
+		{
+		public:
+			PreorderIterator(Glyph* g);
+
+			void first() override;
+			void next() override;
+			bool isDone() override;
+			T* getCurrent() override;
+		private:
+			T* mElement;
+		};
+
+		template<typename T>
+		class ArrayIterator : public Iterator<T>
+		{
+		public:
+			ArrayIterator(Glyph* g);
+
+			void first() override;
+			void next() override;
+			bool isDone() override;
+			T* getCurrent() override;
+		private:
+			T* mElement;
+		};
+
+		template<typename T>
+		class ListIterator : public Iterator<T>
+		{
+		public:
+			ListIterator(Glyph* g);
+
+			void first() override;
+			void next() override;
+			bool isDone() override;
+			T* getCurrent() override;
+		private:
+			T* mElement;
+		};
+
+		template<typename T>
+		class NullIterator : public Iterator<T>
+		{
+		public:
+			void first() override{};
+			void next() override{};
+			bool isDone() override
+			{
+				return true;
+			}
+			T* getCurrent() override{ return nullptr; };
+		};
+
 		class Glyph
 		{
 		public:
@@ -316,6 +409,16 @@ namespace patterns
 			virtual void remove(int poosition);
 			virtual ElementType child(int position);
 			virtual ElementType parent();
+
+			//void first(TraversalEnum kind);
+			//void next();
+			//bool isDone();
+			//Glyph* getCurrent();
+			//void insert(Glyph* g);
+			Iterator<Glyph>* createIterator()
+			{
+				return new NullIterator<Glyph>();
+			}
 		};
 
 		class Rectangle : public Glyph
@@ -422,7 +525,57 @@ namespace patterns
 		{
 			
 		};
+		// unite bridge and abstract factory.
 
+		// Bridge
+		class Coord
+		{
+
+		};
+
+		class WindowImp
+		{
+		public:
+			virtual void impTop() = 0;
+			virtual void impBottom() = 0;
+			virtual void impSetExtentTop(const Point&) = 0;
+			virtual void impSetOrigin(const Point&) = 0;
+
+			virtual void deviceRect(Coord, Coord, Coord, Coord) = 0;
+		protected:
+			WindowImp();
+		};
+
+		class ApplicationWindow : public Window
+		{
+		public:
+			virtual void drawContents();
+		};
+
+		// Command
+		class Command
+		{
+		public:
+			virtual void execute();
+			virtual void unexecute();
+			virtual bool reversible();
+		};
+
+		class PasteComand : public Command
+		{
+		public:
+			void execute() override;
+		private:
+			std::string mData;
+		};
+
+		class MenuItem :public Glyph
+		{
+		public:
+			void clicked();
+		private:
+			Command* mCommand;
+		};
 	}
 
 	namespace chapter3
@@ -547,7 +700,8 @@ namespace patterns
 		public:
 			DoorNeedingSpell(Room* r1 = nullptr, Room* r2 = nullptr);
 		};
-
+		// Abstract factory - set of factory methods.
+		// Related patterns: factory method, prototype, singleton.
 	}
 
 	namespace chapter4
@@ -690,6 +844,27 @@ namespace patterns
 
 		// Related patterns:
 		// - adapter, compositor, strategy.
+
+		// ----------Bridge----------
+		// Handle/Body.
+		// Use when:
+		// - you want to avoid a permanent binding of abstraction to implementation.
+		// - and abstraction, and implementation should be expanded with new subclasses.
+		// - changes in the implementation of an abstraction should not affect customers that is, the client code does not have to be recompiled
+		// - you want to completely hide from clients the realization of abstraction.
+		// - the number of classes begins to grow rapidly
+		// - you want to share an implementation between multiple objects (perhaps using reference counting), and this fact should be hidden from the client.
+		// Results:
+		// - separation of interface from implementation.
+		// - Improved extensibility.
+		// - Hiding implementation details from clients.
+		// Realisation:
+		// - Only one class Implementor.
+		// - creating the right object Implementor. we can use abstract factory.
+		// - separation of distributors.
+		// Related:
+		// - abstract factory.
+		// see realisation in chapter 2.
 	}
 
 	namespace chapter5
@@ -874,6 +1049,109 @@ namespace patterns
 		// Strategy: ...
 		// Observer: ...
 		// MVC: ...
+
+		// Command.
+		// (Action, transaction)
+		// Use when:
+		// - parameterized to perform the actions in the case of the menu items Menultem
+		// - determine to queue and execute requests at different times.
+		// - to support the abolition of the operations.
+		// - support logging changes so they can be run again after the emergency stop system.
+		// - structure based system high level operations built from primitive.
+		// Relations:
+		// - the client creates an object Concrete Command and sets it to the recipient;
+		// - Invoker object stores the initiator ConcreteCommand;
+		// - the initiator sends a request, causing the operation command Execute. if supported the abolition of the executed actions, ConcreteCommand before calling Execute saves state information sufficient for rollback;
+		// - ConcreteCommand operation object is the recipient for the request.
+		// Results:
+		// - command breaks the connection between the object of initiating the operation, and the object that has information on how to execute it;
+		// - Commands - are very real objects. Allowed to manipulate them and expand them in the same way as with any other objects;
+		// - simple commands, you can gather the components, such as the class of Macro Command, discussed above. In general, the compound commands described layout pattern;
+		// - easy to add new commands, as no existing classes do not need to change.
+		// Realisation:
+		// - how "smart" should be a command.
+		// - Support undo and redo operations.
+		// - how to avoid accumulation of errors in the process of cancel.
+		// - the use of templates in C++.
+		
+		class Command
+		{
+		public:
+			virtual ~Command(){};
+			virtual void execute() = 0;
+		protected:
+			Command(){};
+		};
+
+		class Document
+		{
+		public:
+			Document(const std::string& name){};
+			void open(){};
+			void paste(){};
+		};
+
+		class Application
+		{
+		public:
+			void addDocument(Document* document){};
+		};
+
+		class OpenCommand : public Command
+		{
+		public:
+			OpenCommand(Application* app);
+			void execute() override;
+		protected:
+			virtual const std::string& askUser();
+		private:
+			Application* mApplication;
+			std::string mResponse;
+		};
+
+		class PasteCommand : public Command
+		{
+		public:
+			PasteCommand(Document* document);
+			void execute() override;
+		private:
+			Document* mDocument;
+		};
+
+		template<typename Receiver>
+		class SimpleCommand:public Command
+		{
+		public:
+		//	typedef void (Receiver::* r Action)();
+		//	SimpleCommand(Receiver* r, Action a)
+		//		:mReceiver(r), mAction(a)
+		//	{
+
+		//	}
+
+		//	void execute() override
+		//	{
+		//		mReceiver->*mAction();
+		//	}
+
+		//private:
+		//	Action mAction;
+		//	Receiver* mReceiver;
+		};
+
+		class MacroCommand : public Command
+		{
+		public:
+			MacroCommand();
+			virtual ~MacroCommand();
+			virtual void add(Command*);
+			virtual void remove(Command*);
+			void execute() override; // execute all commands from the list
+		private:
+			std::list<Command*> mCommands;
+		};
+		// Related patterns:
+		// composition, memento, prototype.
 	}
 
 	namespace chapter6
