@@ -243,12 +243,16 @@ namespace patterns
 
 			// Strategy...
 
+			// Visitor
+			// SpellingChecker sc;
+
 			// Iterator
 			Glyph* g = new Glyph;
 			Iterator<Glyph>* i = g->createIterator();
 			for (i->first(); !i->isDone(); i->next())
 			{
 				Glyph* child = i->getCurrent();
+				// child->checkMe(sc);
 			}
 		}
 
@@ -324,6 +328,11 @@ namespace patterns
 			return mC;
 		}
 
+		void Character::checkMe(SpellingChecker& sc)
+		{
+			sc.checkCharacter(this);
+		}
+
 		// Rectangle
 		void Rectangle::draw(Window* w)
 		{
@@ -382,6 +391,11 @@ namespace patterns
 		{
 			cout << "Row::insert" << endl;
 			Composite::insert(g, position);
+		}
+
+		void Row::checkMe(SpellingChecker& sc)
+		{
+			sc.checkRow(this);
 		}
 
 		// Polygon
@@ -684,6 +698,22 @@ namespace patterns
 			//MyClass receiver;
 			//Command* c = new SimpleCommand<MyClass>(receiver, &MyClass::action);
 			// c->execute;
+
+			// Iterator
+			//List <Employee*>* employees;
+			//ListIterator<Employee*> forward(employees);
+			//printEmployees(forward);
+			// we can also use backward iterators.
+
+			//AbstractList<Employee*>* employees;
+			//Iterator<Employee*>* iterator = employees->CreateIterator();
+			//printEmployees(*iterator);
+			//delete iterator;
+
+			//AbstractList<Employee*>* employees;
+			//IteraratorPtr<Employee*> iterator(employees->CreateIterator());
+			//printEmployees(*iterator);
+
 		}
 
 		// Observer
@@ -825,6 +855,14 @@ namespace patterns
 		{
 			mDocument->paste();
 		}
+
+		// Iterator
+		void printEmployees(Iterator<Employee*>& i)
+		{
+			for (i.first(); !i.isDone(); i.next())
+				i.current()->print();
+		}
+
 	}
 
 	namespace chapter6

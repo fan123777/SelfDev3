@@ -399,6 +399,8 @@ namespace patterns
 			T* getCurrent() override{ return nullptr; };
 		};
 
+		class SpellingChecker;
+
 		class Glyph
 		{
 		public:
@@ -419,6 +421,9 @@ namespace patterns
 			{
 				return new NullIterator<Glyph>();
 			}
+
+			//
+			void checkMe(SpellingChecker& sc);
 		};
 
 		class Rectangle : public Glyph
@@ -432,11 +437,9 @@ namespace patterns
 		{
 		public:
 			Character(char c);
-
 			void draw(Window* w) override;
-
 			char c();
-
+			void checkMe(SpellingChecker& sc);
 		private:
 			char mC;
 		};
@@ -462,6 +465,7 @@ namespace patterns
 		public:
 			void draw(Window* w) override;
 			void insert(ElementType g, int position) override;
+			void checkMe(SpellingChecker& sc);
 		};
 
 		class Polygon : public Composite
@@ -575,6 +579,30 @@ namespace patterns
 			void clicked();
 		private:
 			Command* mCommand;
+		};
+
+		// Visitor
+		class SpellingChecker
+		{
+		public:
+			virtual void checkCharacter(Character*);
+			virtual void checkRow(Row*);
+
+			const std::list<char> getMisspellings();
+
+		protected:
+			virtual bool isMisspelled(char c);
+
+		private:
+			char mCurrendWord;
+			std::list<char> mMisspellings;
+		};
+
+		class Visitor
+		{
+		public:
+			virtual void visitCharacter(Character*){};
+			virtual void visitRow(Row*){};
 		};
 	}
 
@@ -1152,6 +1180,135 @@ namespace patterns
 		};
 		// Related patterns:
 		// composition, memento, prototype.
+
+		// Iterator(Cursor)
+		// Use when:
+		// - to access the content of aggregated objects without disclosing their internal representation;
+		// - to support multiple active rounds of the same aggregated object
+		// - to provide a uniform interface to bypass various aggregate structures(that is, to support polymorphic iteration)
+		// Results:
+		// - It supports various types of bypass unit.
+		// - iterators simplify the interface of a class Aggregate.
+		// - while for the unit can be active for several rounds.
+		// Realization:
+		// - what party controls the iteration.
+		// - that defines the traversal algorithm.
+		// - how stable is iterator.
+		// - additional operations iterator.
+		// - use polymorphic iterators in C++.
+		// - iterators can have privileged access.
+		// - iterators for composite objects.
+		// - empty iterators. - use for composite objects.
+
+		template<typename Item>
+		class List
+		{
+		public:
+			List(long size);
+			long count() const;
+			Item& get(long index) const;
+		};
+
+		template<typename Item>
+		class Iterator
+		{
+		public:
+			virtual void first() = 0;
+			virtual void next() = 0;
+			virtual bool isDone() const = 0;
+			virtual Item current() const = 0;
+		protected:
+			Iterator();
+		};
+
+		template<typename Item>
+		class ListIterator : public Iterator < Item >
+		{
+		public:
+			ListIterator(const List<Item>* list)
+				:mList(list),
+				mCurrent(0)
+			{
+			}
+
+			void first() override
+			{
+				mCurrent = 0;
+			}
+
+			void next() override
+			{
+				mCurrent++;
+			}
+
+			bool isDone() const override
+			{
+				return mCurrent >= mList->count();
+			}
+
+			Item current() const override
+			{
+				if (isDone())
+					throw "Iterator out of bounds";
+				return mList->get(mCurrent);
+			}
+
+		private:
+			const List<Item>* mList;
+			long mCurrent;
+		};
+
+		class Employee
+		{
+		public:
+			void print()
+			{
+			}
+		};
+
+		void printEmployees(Iterator<Employee*>& i);
+
+		template<typename T>
+		class AbstractList
+		{
+		public:
+			virtual Iterator<T>* CreateIterator() const = 0;
+		};
+
+		template<typename T>
+		class IteratorPtr
+		{
+		public:
+			IteratorPtr(Iterator<T>* i)
+				:mI(i)
+			{}
+
+			~IteratorPtr()
+			{
+				delete mI;
+			}
+
+			Iterator<T>* operator->()
+			{
+				return mI;
+			}
+
+			Iterator<T>& operator*()
+			{
+				return *mI;
+			}
+
+		private:
+
+
+		private:
+			Iterator<T>* mI;
+		};
+		// Related patterns: compositor, factory method, memento.
+		
+		// Visitor.
+		// Use when:
+		// - 
 	}
 
 	namespace chapter6
