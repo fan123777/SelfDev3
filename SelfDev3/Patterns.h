@@ -762,6 +762,9 @@ namespace patterns
 		typedef std::list<Equipment*> ContainerType;
 		typedef ContainerType::iterator ContainerTypeIterator;
 
+		// visitor from chapter5
+		class EquipmentVisitor;
+
 		class Equipment
 		{
 		public:
@@ -774,6 +777,9 @@ namespace patterns
 
 			virtual void add(Equipment* e);
 			virtual void remove(Equipment* e);
+
+			virtual void accept(EquipmentVisitor*);
+
 		protected:
 			Equipment(const std::string& name);
 		private:
@@ -788,6 +794,8 @@ namespace patterns
 			Watt power() override;
 			Currency netPrice() override;
 			Currency discountPrice() override;
+ 
+			void accept(EquipmentVisitor*) override;
 		};
 
 		class CompositeEquipment : public Equipment
@@ -813,6 +821,8 @@ namespace patterns
 			Watt power() override;
 			Currency netPrice() override;
 			Currency discountPrice() override;
+
+			void accept(EquipmentVisitor*) override;
 		};
 
 		//Related Patterns
@@ -1308,7 +1318,33 @@ namespace patterns
 		
 		// Visitor.
 		// Use when:
-		// - 
+		// - the structure also contains objects of many classes with different interfaces and you want to perform operations on them, depending on the specific classes;
+		// - on objects that are part of the structure, it is necessary to perform a variety, unrelated operation and you do not want to "clutter up" classes such operations.
+		// - classes that establish the structure of objects rarely change, but new operations on this structure are added frequently.
+		// Results:
+		// - simplifies the addition of new operations.
+		// - It combines related operations and cuts those that do not concern them.
+		// - adding new classes ConcreteElement difficult.
+		// - visiting different class hierarchies.
+		// - accumulation state.
+		// - violation of encapsulation.
+		// Realization:
+		// - double dispatch.
+		// - What part is responsible for bypassing the structure.
+		using namespace chapter4;
+
+		class EquipmentVisitor
+		{
+		public:
+			virtual ~EquipmentVisitor(){};
+			virtual void visitFloppyDisk(FloppyDisk*){};
+			virtual void visitChassis(Chassis*){};
+		protected:
+			EquipmentVisitor(){};
+		};
+
+		// Practice with visitor!!!
+		// Related patterns: composite, interpreter.
 	}
 
 	namespace chapter6

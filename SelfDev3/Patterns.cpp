@@ -605,6 +605,8 @@ namespace patterns
 
 	namespace chapter4
 	{
+		using namespace chapter5;
+
 		void main()
 		{
 			// Decorator
@@ -621,6 +623,11 @@ namespace patterns
 			for (auto& item : mEquipment)
 				total += item->netPrice();
 			return total;
+		}
+
+		void FloppyDisk::accept(EquipmentVisitor* visitor)
+		{
+//			visitor->visitFloppyDisk(this);
 		}
 
 		// Decorator
