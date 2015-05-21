@@ -218,6 +218,24 @@ namespace patterns
 		{
 			return new TableController(this);
 		}
+
+		// Rectangle
+		int Rectangle::area()
+		{
+			return mWidth * mHeight;
+		}
+		// Window
+		Window::Window(Rectangle* r)
+			:mR(r)
+		{
+
+		}
+
+		int Window::area()
+		{
+			return mR->area();
+		}
+
 	}
 
 	namespace chapter2
@@ -258,7 +276,7 @@ namespace patterns
 
 		//*** Composite
 		// Window
-		void Window::drawRect(Glyph* g)
+		void Window::drawRect(int x0, int x1, int y0, int y1)
 		{
 			cout << "Window::drawRect" << endl;
 		}
@@ -274,6 +292,11 @@ namespace patterns
 		}
 
 		// Glyph
+		Glyph::~Glyph()
+		{
+
+		}
+
 		void Glyph::draw(Window* w)
 		{
 			w->drawGlyph(this);
@@ -336,7 +359,7 @@ namespace patterns
 		// Rectangle
 		void Rectangle::draw(Window* w)
 		{
-			w->drawRect(this);
+			w->drawRect(mX0, mX1, mY0, mY1);
 		}
 
 		// Composite
@@ -625,11 +648,6 @@ namespace patterns
 			return total;
 		}
 
-		void FloppyDisk::accept(EquipmentVisitor* visitor)
-		{
-//			visitor->visitFloppyDisk(this);
-		}
-
 		// Decorator
 		// VisualComponent
 		VisualComponent::~VisualComponent()
@@ -870,6 +888,19 @@ namespace patterns
 				i.current()->print();
 		}
 
+		// CompositeEquipment
+		Currency CompositeEquipment::netPrice()
+		{
+			Currency total = 0;
+			for (auto& item : mEquipment)
+				total += item->netPrice();
+			return total;
+		}
+
+		void FloppyDisk::accept(EquipmentVisitor* visitor)
+		{
+			//			visitor->visitFloppyDisk(this);
+		}
 	}
 
 	namespace chapter6

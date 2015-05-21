@@ -272,6 +272,26 @@ namespace patterns
 		// deactivate view, if deactivate controller.
 
 		// Next: Observer, Composite, Strategy.
+
+		class Rectangle
+		{
+		public:
+			int area();
+		private:
+			int mWidth;
+			int mHeight;
+		};
+
+		class Window
+		{
+		public:
+			Window(Rectangle* r);
+
+			int area();
+
+		private:
+			Rectangle* mR;
+		};
 	}
 
 	namespace chapter2
@@ -301,7 +321,7 @@ namespace patterns
 			// graphics
 			virtual void drawLine(){};
 			void drawGlyph(Glyph* g);
-			void drawRect(Glyph* g);
+			void drawRect(int x0, int x1, int y0,int y1);
 			void drawCharacter(Character* g);
 		protected:
 			WindowImpl* getWindowImp();
@@ -316,9 +336,10 @@ namespace patterns
 
 		};
 
-		class Point
+		struct Point
 		{
-
+			int x;
+			int y;
 		};
 
 		typedef std::shared_ptr<Glyph> ElementType;
@@ -404,11 +425,13 @@ namespace patterns
 		class Glyph
 		{
 		public:
+			virtual ~Glyph();
+
 			virtual void draw(Window* w);
 			virtual void bounds(Rect& r);
 			virtual bool intersects(const Point& p);
 			virtual void insert(ElementType g, int position);
-			virtual void remove(int poosition);
+			virtual void remove(int position);
 			virtual ElementType child(int position);
 			virtual ElementType parent();
 
@@ -431,6 +454,11 @@ namespace patterns
 		public:
 			void draw(Window* w) override;
 			bool intersects(const Point& p) override;
+		private:
+			int mX0;
+			int mX1;
+			int mY0;
+			int mY1;
 		};
 
 		class Character : public Glyph
@@ -440,6 +468,7 @@ namespace patterns
 			void draw(Window* w) override;
 			char c();
 			void checkMe(SpellingChecker& sc);
+
 		private:
 			char mC;
 		};
@@ -762,9 +791,6 @@ namespace patterns
 		typedef std::list<Equipment*> ContainerType;
 		typedef ContainerType::iterator ContainerTypeIterator;
 
-		// visitor from chapter5
-		class EquipmentVisitor;
-
 		class Equipment
 		{
 		public:
@@ -777,8 +803,6 @@ namespace patterns
 
 			virtual void add(Equipment* e);
 			virtual void remove(Equipment* e);
-
-			virtual void accept(EquipmentVisitor*);
 
 		protected:
 			Equipment(const std::string& name);
@@ -794,8 +818,6 @@ namespace patterns
 			Watt power() override;
 			Currency netPrice() override;
 			Currency discountPrice() override;
- 
-			void accept(EquipmentVisitor*) override;
 		};
 
 		class CompositeEquipment : public Equipment
@@ -822,7 +844,6 @@ namespace patterns
 			Currency netPrice() override;
 			Currency discountPrice() override;
 
-			void accept(EquipmentVisitor*) override;
 		};
 
 		//Related Patterns
@@ -1331,7 +1352,75 @@ namespace patterns
 		// Realization:
 		// - double dispatch.
 		// - What part is responsible for bypassing the structure.
-		using namespace chapter4;
+
+		// from previous chapter
+		typedef int Watt;
+		typedef int Currency;
+		class Equipment;
+		typedef std::list<Equipment*> ContainerType;
+		typedef ContainerType::iterator ContainerTypeIterator;
+
+		class EquipmentVisitor;
+
+		class Equipment
+		{
+		public:
+			virtual ~Equipment();
+
+			const std::string& getName();
+			virtual Watt power();
+			virtual Watt netPrice();
+			virtual Currency discountPrice();
+
+			virtual void add(Equipment* e);
+			virtual void remove(Equipment* e);
+
+			virtual void accept(EquipmentVisitor*);
+
+		protected:
+			Equipment(const std::string& name);
+		private:
+			std::string mName;
+		};
+
+		class FloppyDisk : public Equipment
+		{
+		public:
+			FloppyDisk(const std::string& name);
+			~FloppyDisk() override;
+			Watt power() override;
+			Currency netPrice() override;
+			Currency discountPrice() override;
+
+			void accept(EquipmentVisitor*) override;
+		};
+
+		class CompositeEquipment : public Equipment
+		{
+		public:
+			~CompositeEquipment() override;
+			Watt power() override;
+			Currency netPrice() override;
+			Currency discountPrice() override;
+			void add(Equipment* e) override;
+			void remove(Equipment* e) override;
+		protected:
+			CompositeEquipment(const std::string& name);
+		private:
+			ContainerType mEquipment;
+		};
+
+		class Chassis : public CompositeEquipment
+		{
+		public:
+			Chassis(const std::string& name);
+			~Chassis() override;
+			Watt power() override;
+			Currency netPrice() override;
+			Currency discountPrice() override;
+
+			void accept(EquipmentVisitor*) override;
+		};
 
 		class EquipmentVisitor
 		{
@@ -1343,7 +1432,6 @@ namespace patterns
 			EquipmentVisitor(){};
 		};
 
-		// Practice with visitor!!!
 		// Related patterns: composite, interpreter.
 	}
 
