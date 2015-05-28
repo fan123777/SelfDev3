@@ -244,6 +244,12 @@ namespace patterns
 		{
 			Window w;
 
+			// Abstract Factory
+			GUIFactory* factory = new GUIFactory;
+			Button* button = factory->createButton();
+			delete button;
+			delete factory;
+
 			//*** Composite
 			Row row;
 			shared_ptr<Character> c1(new Character('a'));
@@ -272,6 +278,37 @@ namespace patterns
 				Glyph* child = i->getCurrent();
 				// child->checkMe(sc);
 			}
+		}
+
+		// Abstract factory
+		ScrollBar* GUIFactory::createScrollBar()
+		{
+			return new ScrollBar;
+		}
+
+		Button* GUIFactory::createButton()
+		{
+			return new Button;
+		}
+
+		Menu* GUIFactory::createMenu()
+		{
+			return new Menu;
+		}
+
+		void ScrollBar::ScrollTo(int)
+		{
+
+		}
+
+		void Button::press()
+		{
+
+		}
+
+		void Menu::popup()
+		{
+
 		}
 
 		//*** Composite
@@ -483,7 +520,22 @@ namespace patterns
 	{
 		void main()
 		{
+			// It is Client
+			MazeGame game;
+			EnchantedMazeFactory factory;
+			game.CreateMaze(factory);
 
+			// Builder
+			Maze* maze;
+			MazeGame game1;
+			StandardMazeBuilder builder;
+			game1.CreateMaze(builder);
+			maze = builder.getMaze();
+
+			// Prototype
+			//MazeGame game2;
+			//MazePrototypeFactory simpleMazeFactory(new Maze, new Wall, new Room(0), new Door);
+			//Maze* maze2 = game2.CreateMaze(simpleMazeFactory);
 		}
 		// Room
 		Room::Room(int roomNo)
@@ -545,6 +597,16 @@ namespace patterns
 			r1->setSide(West, new Wall);
 
 			return aMaze;
+		}
+
+		Maze* MazeGame::CreateMaze(MazeBuilder& builder)
+		{
+			builder.buildMaze();
+			builder.buildRoom(1);
+			builder.buildRoom(2);
+			builder.buildDoor(1, 2);
+
+			return builder.getMaze();
 		}
 
 		// MazeFactory
@@ -623,13 +685,48 @@ namespace patterns
 		{
 
 		}
-		
+
+		// Builder
+		void RTFReader::parseRTF()
+		{
+			builder->convertCharacter();
+		}
+
+		// Factory Method
+		Maze* MazeGame::makeMaze()
+		{
+			Maze* aMaze = MakeMaze();
+			Room* rl = MakeRoom(1);
+			Room* r2 = MakeRoom(2);
+			Door* theDoor = MakeDoor(rl, r2);
+			aMaze->AddRoom(rl);
+			aMaze->AddRoom(r2);
+			rl->setSide(North, MakeWall());
+			rl->setSide(East, theDoor);
+			rl->setSide(South, MakeWall());
+			rl->setSide(West, MakeWall());
+			r2->setSide(North, MakeWall());
+			r2->setSide(East, MakeWall());
+			r2->setSide(South, MakeWall());
+			r2->setSide(West, theDoor);
+			return aMaze;
+		}
+
+		// Singleton
+		MazeFactorySingleton* MazeFactorySingleton::instance = nullptr;
+
+		MazeFactorySingleton* MazeFactorySingleton::Instance()
+		{
+			if (instance == nullptr)
+			{
+				instance = new MazeFactorySingleton;
+			}
+			return instance;
+		}
 	}
 
 	namespace chapter4
 	{
-		using namespace chapter5;
-
 		void main()
 		{
 			// Decorator
@@ -637,6 +734,40 @@ namespace patterns
 			VisualComponent* borderedVCs = new BorderDecorator(vc, 5);
 			delete borderedVCs;
 			delete vc;
+		}
+
+		// Adapter for classes
+		void TextShape::boundingBox()
+		{
+			getOrigin();
+			getExtent();
+		}
+
+		void TextShape1::createManipulator()
+		{
+			// return new Manipulator;
+		}
+
+		bool TextShape1::isEmpty()
+		{
+			return mTv->isEmpty();
+		}
+
+		// Adapter for objects
+		void TextShape1::boundingBox()
+		{
+			mTv->getOrigin();
+			mTv->getExtent();
+		}
+
+		void TextShape::createManipulator()
+		{
+			// return new Manipulator;
+		}
+
+		bool TextShape::isEmpty()
+		{
+			return TextView::isEmpty();
 		}
 
 		// CompositeEquipment
@@ -700,6 +831,12 @@ namespace patterns
 		void BorderDecorator::drawBorder(int width)
 		{
 			cout << "BorderDecorator::drawBorder()\n";
+		}
+
+		// Bridge
+		void Window::open()
+		{
+			impl->top();
 		}
 	}
 

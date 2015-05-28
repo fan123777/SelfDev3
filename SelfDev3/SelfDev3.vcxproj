@@ -80,9 +80,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Patterns.cpp" />
+    <ClCompile Include="SNMP.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Patterns.h" />
+    <ClInclude Include="SNMP.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

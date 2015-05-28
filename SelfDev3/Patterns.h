@@ -449,6 +449,33 @@ namespace patterns
 			void checkMe(SpellingChecker& sc);
 		};
 
+		// Abstract Factory.
+		class ScrollBar : public Glyph
+		{
+		public:
+			virtual void ScrollTo(int);
+		};
+
+		class Button : public Glyph
+		{
+		public:
+			virtual void press();
+		};
+
+		class Menu : public Glyph
+		{
+		public:
+			virtual void popup();
+		};
+
+		class GUIFactory
+		{
+		public:
+			virtual ScrollBar* createScrollBar();
+			virtual Button* createButton();
+			virtual Menu* createMenu();
+		};
+
 		class Rectangle : public Glyph
 		{
 		public:
@@ -670,7 +697,7 @@ namespace patterns
 		class Wall : public MapSite
 		{
 		public:
-
+			Wall(){}
 			void enter() override;
 		};
 
@@ -693,20 +720,98 @@ namespace patterns
 		public:
 			void AddRoom(Room* room);
 			Room* roomNo(int) const;
+			Maze* clone()
+			{
+				return new Maze(*this);
+			}
+
+			// if need some additional informarmation after cloning.
+			virtual void initialize()
+			{
+
+			}
+
 		private:
 		};
 
 		class MazeFactory;
+
+		class MazeBuilder;
 
 		class MazeGame
 		{
 		public:
 			Maze* CreateMaze();
 			Maze* CreateMaze(const MazeFactory& factory);
+			Maze* CreateMaze(MazeBuilder& builder);
+
+			// factory methods
+			virtual Maze* MakeMaze() const
+			{ return new Maze; }
+			virtual Room* MakeRoom(int n) const
+			{ return new Room(n);}
+			virtual Wall* MakeWall() const
+			{ return new Wall; }
+			virtual Door* MakeDoor(Room* rl, Room* r2) const
+			{return new Door(rl, r2);}
+
+			Maze* makeMaze();
+
 		};
 
 		// Abstract Factory
 		// Kit
+		// Motivation:
+		class Window
+		{
+
+		};
+
+		class PMWindow : public Window
+		{
+
+		};
+
+		class MotifWindow : public Window
+		{
+
+		};
+
+		class ScrollBar
+		{
+
+		};
+
+		class PMScrollBar : public ScrollBar
+		{
+
+		};
+
+		class MotifScrollBar : public ScrollBar
+		{
+
+		};
+
+		class WidgetFactory
+		{
+		public:
+			virtual ScrollBar* createScrollBar() = 0;
+			virtual Window* createWindow() = 0;
+		};
+
+		class MotifWidgetFactory : public WidgetFactory
+		{
+		public:
+			ScrollBar* createScrollBar() override;
+			Window* createWindow() override;
+		};
+
+		class PMWidgetFactory : public WidgetFactory
+		{
+		public:
+			ScrollBar* createScrollBar() override;
+			Window* createWindow() override;
+		};
 		// Use when:
 		// - the system should not depend on how created, assembled and presented to its constituent objects
 		// - belonging to a family of related facilities should be used together, and you need to enforce this restriction;
@@ -721,7 +826,7 @@ namespace patterns
 		// - factory as objects that exist in a single copy.
 		// - creating products.
 		// - definition extensible factories.
-
+		// Example:
 		class MazeFactory
 		{
 		public:
@@ -757,13 +862,479 @@ namespace patterns
 		public:
 			DoorNeedingSpell(Room* r1 = nullptr, Room* r2 = nullptr);
 		};
+
+		// MazeFactory is concrete class.
 		// Abstract factory - set of factory methods.
 		// Related patterns: factory method, prototype, singleton.
+
+		// Builder
+		// Motivation:
+		class TextConverter
+		{
+		public:
+			virtual void convertCharacter();
+			virtual void convertFontChange();
+			virtual void convertParagraph();
+		};
+
+		class ASCIIConverter :public TextConverter
+		{
+		public:
+			void convertCharacter() override;
+			void getASCIIText();
+		};
+
+		class TeXConverter :public TextConverter
+		{
+		public:
+			void convertCharacter() override;
+			void convertFontChange() override;
+			void convertParagraph() override;
+			void getTeXText();
+		};
+
+		class TextWidgetConverter :public TextConverter
+		{
+		public:
+			void convertCharacter() override;
+			void convertFontChange() override;
+			void convertParagraph() override;
+			void getTextWidget();
+		};
+
+		class RTFReader
+		{
+		public:
+			void parseRTF();
+		private:
+			TextConverter* builder;
+		};
+		// Use wwhen:
+		// - algorithm for creating a complex object should not depend on which parts of an object is and how they are joined together
+		// - the design process should provide different views of the constructed object
+		// Results:
+		// - It allows you to change the internal representation of the product.
+		// - It isolates the code that implements the design and performance.
+		// - It gives finer control over the design process.
+		// Realization:
+		// - interface design and assembly.
+		// - why not an abstract class for products.
+		// - empty methods class Builder by default.
+
+		class MazeBuilder
+		{
+		public:
+			virtual void buildMaze(){};
+			virtual void buildRoom(int){};
+			virtual void buildDoor(int, int){};
+			virtual Maze* getMaze()
+			{
+				return nullptr;
+			}
+		};
+
+		class StandardMazeBuilder : public MazeBuilder
+		{
+		public:
+			StandardMazeBuilder()
+			{
+				currentMaze = nullptr;
+			}
+
+			void buildMaze() override
+			{
+				currentMaze = new Maze;
+			}
+			void buildRoom(int) override
+			{
+
+			}
+			void buildDoor(int, int) override
+			{
+
+			}
+			Maze* getMaze() override
+			{
+				return currentMaze;
+			}
+
+		private:
+			DirectionEnum commonWall(Room*, Room*);
+			Maze* currentMaze;
+		};
+		// Related patterns: abstract factory, compositor.
+
+		// Factory method.
+		// virtual constructor.
+
+		class Document
+		{
+		public:
+			virtual ~Document();
+
+			virtual void open() = 0;
+			virtual void close() = 0;
+			virtual void save() = 0;
+			virtual void revert() = 0;
+		};
+
+		class Application
+		{
+		public:
+			virtual ~Application();
+
+			virtual Document* createDocument() = 0;
+			virtual void openDocument() = 0;
+			virtual void newDocument() = 0;
+		};
+
+		class MyDocument :public Document
+		{
+		public:
+			void open() override{}
+			void close() override{}
+			void save() override{}
+			void revert() override{}
+		};
+
+		class MyApplication : public Application
+		{
+		public:
+			Document* createDocument() override
+			{
+				return new MyDocument();
+			}
+
+			void openDocument() override
+			{
+
+			}
+
+			void newDocument() override
+			{
+				mDocuments.push_back(new MyDocument);
+			}
+
+		private:
+			std::list<Document*> mDocuments;
+		};
+		// Use when:
+		// - the class is not known beforehand, objects which classes it is necessary to create.
+		// - Class is designed so that objects that it creates, specify subclasses
+		// - class delegate their responsibilities to one of several subsidiary subclasses
+		// Results:
+		// - It provides subclasses operations hooks
+		// - connects parallel hierarchies
+		// Realization:
+		// - two main types of pattern
+		// - parameterized factory methods
+		// - language-dependent variations and problems.
+		// - You have to be careful not to cause the factory methods in the class constructor Creator: at this moment the factory method in a derived class ConcreteCreator not yet available.
+		// - Use templates to avoid subclassing.
+		// - naming conventions.
+		// Related Patterns: abstract factory, template method(new document), Prototype.
+
+		// Prototype.
+		class Graphic
+		{
+		public:
+			virtual ~Graphic();
+			virtual void draw();
+			virtual Graphic* clone();
+		};
+
+		class Staff : public Graphic
+		{
+		public:
+			void draw() override;
+			Graphic* clone() override;
+		};
+
+		class MusicalNote : public Graphic
+		{
+
+		};
+
+		class WholeNote : public MusicalNote
+		{
+		public:
+			void draw() override;
+			Graphic* clone() override
+			{
+				return new WholeNote(*this);
+			}
+		};
+
+		class Tool
+		{
+		public:
+			virtual ~Tool();
+			virtual void manipulate() = 0;
+		};
+
+		class RotateTool :public Tool
+		{
+		public:
+			void manipulate() override;
+		};
+
+		class GraphicTool : public Tool
+		{
+		public:
+			void manipulate() override
+			{
+
+			}
+		private:
+			Graphic* prototype;
+		};
+		// Use when:
+		// - instantiated classes are defined at run time, for example, by dynamic loading.
+		// - in order to avoid constructing class hierarchies, or factories, parallel class hierarchy of products.
+		// - instances may be in one of the not very large number of different states.
+		// Results:
+		// - adding and removing products at runtime.
+		// - specification of new objects by varying values.
+		// - Specifying new objects by varying structure.
+		// - reducing the number of subclasses.
+		// - dynamic configuration application classes.
+		// Realization.
+		// - Use the controller prototyping.
+		// - implementation of clone operation.
+		// - Initialization clones.
+		class MazePrototypeFactory : public MazeFactory
+		{
+		public:
+			MazePrototypeFactory(Maze* m, Wall* w, Room* r, Door* d)
+				:prototypeMaze(m),
+				prototypeWall(w),
+				prototypeRoom(r),
+				prototypeDoor(d)
+			{
+			}
+
+			Maze* makeMaze() const override
+			{
+				return prototypeMaze->clone();
+				return new Maze;
+			}
+			Wall* makeWall() const override;
+			Room* makeRoom(int n) const override;
+			Door* makeDoor(Room* r1, Room* r2) const override;
+
+		private:
+			Maze* prototypeMaze;
+			Room* prototypeRoom;
+			Wall* prototypeWall;
+			Door* prototypeDoor;
+		};
+		// Related Patterns: abstract factory, compositor, decorator.
+
+		// Singleton.
+		// Use when:
+		// - must be exactly one instance of a class, readily available to all customers;
+		// - only copy should expand by generating subclasses, and customers need to be able to work with an expanded instance without modifying their code
+		// Results:
+		// - controlled access to a single copy.
+		// - decrease in the number of names.
+		// - allows specification of operations and presentation.
+		// - allows a variable number of copies.
+		// - greater flexibility than class operations.
+		// Realization:
+		// - guaranteeing a single instance.
+		// in C ++ is not determined by the order of constructor calls for global objects across borders translation units.It means that generating patterns among solitary there can be no dependencies. if they are, mistakes are inevitable.
+		// - subclassing Singleton.
+
+		class MazeFactorySingleton
+		{
+		public:
+			static MazeFactorySingleton* Instance();
+		protected:
+			MazeFactorySingleton()
+			{
+			}
+		private:
+			static MazeFactorySingleton* instance;
+		};
+		// Related patterns: abstract factory, builder, prototype.
+
+		// Discussion of generating patterns
+		// You can use factory method first, but if you see then it is not good, use others.
 	}
 
 	namespace chapter4
 	{
 		void main();
+
+		// Adapter
+		// Wrapper.
+		// Use when:
+		// - You want to use an existing class, but its interface does not match your needs;
+		// - going to create a reusable class that must interact with the unknown in advance or related classes that have incompatible interfaces;
+		// - (only for adapter objects!) you need to use several existing subclasses, but impractical to adapt their interface by generating new subclasses of each.
+		// class adapter uses inheritance.
+		// object adapter uses composition.
+		// Results for class adapter:
+		// - Adaptee adapts to Target, entrusting particular class action Adaptee(don't works for subclasses)
+		// - Adapter enables the adapter to replace some operations adaptable class Adaptee, since Adapter is nothing, as a subclass Adaptee;
+		// - introduces only one new object. To get to the adapted class does not need any additional treatment at the sign.
+		// Results for object adapter:
+		// - It allows a single adapter Adapter works with many adaptable objects Adaptee, ie with itself and its subclasses Adaptee
+		// - complicates the replacement class operations Adaptee. This will require to generate a subclass of Adaptee Adapter and make reference to this subclass and not on himself Adaptee.
+		// Questions to discuss.
+		// - the amount of work on adaptation.
+		// - Replacement adapters.
+		// - Use double-sided adapters to ensure transparency.
+		// Realization:
+		// - adapter class implementation in C ++.(private inheritance to adapter and public to target)
+		// - Replacement adapters.
+		// - parameterized adapters.
+
+		// classes
+		class Shape
+		{
+		public:
+			Shape(){}
+			virtual void boundingBox(){}
+			virtual void createManipulator(){}
+		};
+
+		class TextView
+		{
+		public:
+			TextView(){}
+			void getOrigin(){}
+			void getExtent(){}
+			virtual bool isEmpty(){ return false; }
+		};
+
+		class TextShape : public Shape, private TextView
+		{
+		public:
+			TextShape(){};
+
+			void boundingBox() override;
+			void createManipulator() override;
+			bool isEmpty() override;
+		};
+
+		// objects
+		class TextShape1 : public Shape
+		{
+		public:
+			TextShape1(TextView* tv)
+				:mTv(tv)
+			{
+			}
+
+			void boundingBox() override;
+			void createManipulator() override;
+			virtual bool isEmpty();
+
+		private:
+			TextView* mTv;
+		};
+		// for objects it also works with subclasses.
+		// related patterns: bridge, decorator, proxy.
+
+		// ----------Decorator----------
+		// Wrapper
+		// Use when:
+		// - dynamically add new functionality (transparent to the client)
+		// - to implement responsibilities
+		// - when making subclasses is not convinient or possible.
+		// Results:
+		// +:
+		// - more flexible then inheritance.
+		// - avoids an overloaded function classes on the upper levels hierarchy.
+		// -:
+		// - decorator and its component aren't equel
+		// - lots of small objects
+		// Realisation
+		// - interfaces of decorator and component must be equal.
+		// - if only 1 additional functionality - no need in abstract decorator class.
+		// - Component classes lightweight, component class should be interface.
+		// - changes in appearance, but not the internal structure of the object.
+		// - decorators are transparent for components.
+
+		class VisualComponent
+		{
+		public:
+			virtual ~VisualComponent();
+
+			virtual void draw();
+			virtual void resize();
+		};
+
+		class Decorator :public VisualComponent
+		{
+		public:
+			Decorator(VisualComponent* vc);
+			void draw() override;
+			void resize() override;
+		private:
+			VisualComponent* mComponent;
+		};
+
+		class BorderDecorator : public Decorator
+		{
+		public:
+			BorderDecorator(VisualComponent* vc, int width);
+			void draw() override;
+		private:
+			void drawBorder(int width);
+			int mWidth;
+		};
+
+		// Related patterns:
+		// - adapter, compositor, strategy.
+
+		// ----------Bridge----------
+		// Handle/Body.
+		// Use when:
+		// - you want to avoid a permanent binding of abstraction to implementation.
+		// - and abstraction, and implementation should be expanded with new subclasses.
+		// - changes in the implementation of an abstraction should not affect customers that is, the client code does not have to be recompiled
+		// - you want to completely hide from clients the realization of abstraction.
+		// - the number of classes begins to grow rapidly
+		// - you want to share an implementation between multiple objects (perhaps using reference counting), and this fact should be hidden from the client.
+		// Results:
+		// - separation of interface from implementation.
+		// - Improved extensibility.
+		// - Hiding implementation details from clients.
+		// Realisation:
+		// - Only one class Implementor.
+		// - creating the right object Implementor. we can use abstract factory.
+		// - separation of distributors.
+		class WindowImpl;
+
+		class Window
+		{
+		public:
+			Window();
+
+			virtual void draw();
+			virtual void open();
+
+			virtual void setOrigin();
+
+		protected:
+			WindowImpl* getWindowImpl();
+
+		private:
+			WindowImpl* impl;
+		};
+
+		class WindowImpl
+		{
+		public:
+			virtual void top() = 0;
+		};
+		// we also can get windowimpl from widget factory, this factory creates all system-dependent objects.
+
+		// Related:
+		// - abstract factory, adapter.
+		// Customers should be able to create a window, not being tied to a particular implementation.
 
 		// ----------Composite----------
 		// Use when
@@ -850,80 +1421,6 @@ namespace patterns
 		// - chain of responsibilities
 		// - decorator
 		// - visitor
-		// practise with composite
-
-		// ----------Decorator----------
-		// Wrapper
-		// Use when:
-		// - dynamically add new functionality (transparent to the client)
-		// - to implement responsibilities
-		// - when making subclasses is not convinient or possible.
-		// Results:
-		// +:
-		// - more flexible then inheritance.
-		// - avoids an overloaded function classes on the upper levels hierarchy.
-		// -:
-		// - decorator and its component aren't equel
-		// - lots of small objects
-		// Realisation
-		// - interfaces of decorator and component must be equal.
-		// - if only 1 additional functionality - no need in abstract decorator class.
-		// - Component classes lightweight, component class should be interface.
-		// - changes in appearance, but not the internal structure of the object.
-		// - decorators are transparent for components.
-
-		class VisualComponent
-		{
-		public:
-			virtual ~VisualComponent();
-
-			virtual void draw();
-			virtual void resize();
-		};
-
-		class Decorator :public VisualComponent
-		{
-		public:
-			Decorator(VisualComponent* vc);
-			void draw() override;
-			void resize() override;
-		private:
-			VisualComponent* mComponent;
-		};
-
-		class BorderDecorator : public Decorator
-		{
-		public:
-			BorderDecorator(VisualComponent* vc, int width);
-			void draw() override;
-		private:
-			void drawBorder(int width);
-			int mWidth;
-		};
-
-		// Related patterns:
-		// - adapter, compositor, strategy.
-
-		// ----------Bridge----------
-		// Handle/Body.
-		// Use when:
-		// - you want to avoid a permanent binding of abstraction to implementation.
-		// - and abstraction, and implementation should be expanded with new subclasses.
-		// - changes in the implementation of an abstraction should not affect customers that is, the client code does not have to be recompiled
-		// - you want to completely hide from clients the realization of abstraction.
-		// - the number of classes begins to grow rapidly
-		// - you want to share an implementation between multiple objects (perhaps using reference counting), and this fact should be hidden from the client.
-		// Results:
-		// - separation of interface from implementation.
-		// - Improved extensibility.
-		// - Hiding implementation details from clients.
-		// Realisation:
-		// - Only one class Implementor.
-		// - creating the right object Implementor. we can use abstract factory.
-		// - separation of distributors.
-		// Related:
-		// - abstract factory.
-		// see realisation in chapter 2.
 	}
 
 	namespace chapter5
