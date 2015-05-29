@@ -1651,11 +1651,85 @@ namespace patterns
 		// practice with Flyweight!!!.
 
 		// Proxy.
+		// Surrogate.
+		class DocumentEditor
+		{
+
+		};
+
+		class Graphic
+		{
+		public:
+			virtual ~Graphic();
+
+			virtual void draw();
+			virtual void getExtent();
+			virtual void store();
+			virtual void load();
+		};
+
+		class Image : public Graphic
+		{
+		public:
+			void draw() override;
+			void getExtent() override;
+			void store() override;
+			void load() override;
+		private:
+			// imageImp 
+			// extent
+		};
+
+		class ImageProxy : public Graphic
+		{
+		public:
+			void draw() override;
+			void getExtent() override;
+			void store() override;
+			void load() override;
+		private:
+			// filename 
+			// extent
+			Image* image;
+		};
+
+		// Use when:
+		// - Remote assistant provides a local representative instead object in another address space.
+		// - virtual assistant creates a "heavy" objects on demand.
+		// - Deputy protects controls access to the original object.
+		// - smart pointers.
+		// Results:
+		// - Remote substituent may hide the fact that the object is in a different address space;
+		// - virtual assistant can perform optimizations, such as creating an object on demand;
+		// - Deputy protects and "smart" links allow additional tasks when accessing the object.
+		// - copy on demand.
+		// Realization:
+		// - overload operator access to members in C++.
+		// - proxy shouldn't always be known type of real object.
+		// Related Patterns:
+		// - adapter, decorator
+		// !!! practice with proxy.
+
+		// Discussion of structural patterns
+		// Adapter and Bridge.
+		// Composition, Decorator and Proxy.
 	}
 
 	namespace chapter5
 	{
 		void main();
+
+		// Chain of Responsibility
+		// we say that request has implicit receiver
+
+
+
+
+
+
+
+
+
 
 		// ----------Observer(dependents, publisher-subscriber)----------
 		// Use when:

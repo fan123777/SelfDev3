@@ -16,7 +16,7 @@ namespace patterns
 		chapter2::main();
 		chapter3::main();
 		chapter4::main();
-//		chapter5::main();
+		chapter5::main();
 		chapter6::main();
 	}
 
@@ -864,6 +864,27 @@ namespace patterns
 			//}
 		}
 
+		// Proxy
+		void ImageProxy::draw()
+		{
+			if (image == nullptr)
+			{
+				// image = load(filename);
+			}
+			image->draw();
+		}
+
+		void ImageProxy::getExtent()
+		{
+			if (image == nullptr)
+			{
+				//return extent;
+			}
+			else
+			{
+				return image->getExtent();
+			}
+		}
 	}
 
 	namespace chapter5
@@ -871,11 +892,11 @@ namespace patterns
 		void main()
 		{
 			// Observer
-			ClockTimer ct;
-			DigitalClock dc(&ct);
-			ct.start();
-			this_thread::sleep_for(chrono::seconds(10));
-			ct.stop();
+			//ClockTimer ct;
+			//DigitalClock dc(&ct);
+			//ct.start();
+			//this_thread::sleep_for(chrono::seconds(10));
+			//ct.stop();
 
 			// Strategy
 //			Composition* quick = new Composition(new SimpleCompositor);
@@ -903,6 +924,17 @@ namespace patterns
 			//printEmployees(*iterator);
 
 		}
+
+		// Chain of Responsibility
+
+
+
+
+
+
+
+
+
 
 		// Observer
 		// Subject
