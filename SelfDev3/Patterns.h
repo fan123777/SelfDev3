@@ -1237,58 +1237,6 @@ namespace patterns
 		// for objects it also works with subclasses.
 		// related patterns: bridge, decorator, proxy.
 
-		// ----------Decorator----------
-		// Wrapper
-		// Use when:
-		// - dynamically add new functionality (transparent to the client)
-		// - to implement responsibilities
-		// - when making subclasses is not convinient or possible.
-		// Results:
-		// +:
-		// - more flexible then inheritance.
-		// - avoids an overloaded function classes on the upper levels hierarchy.
-		// -:
-		// - decorator and its component aren't equel
-		// - lots of small objects
-		// Realisation
-		// - interfaces of decorator and component must be equal.
-		// - if only 1 additional functionality - no need in abstract decorator class.
-		// - Component classes lightweight, component class should be interface.
-		// - changes in appearance, but not the internal structure of the object.
-		// - decorators are transparent for components.
-
-		class VisualComponent
-		{
-		public:
-			virtual ~VisualComponent();
-
-			virtual void draw();
-			virtual void resize();
-		};
-
-		class Decorator :public VisualComponent
-		{
-		public:
-			Decorator(VisualComponent* vc);
-			void draw() override;
-			void resize() override;
-		private:
-			VisualComponent* mComponent;
-		};
-
-		class BorderDecorator : public Decorator
-		{
-		public:
-			BorderDecorator(VisualComponent* vc, int width);
-			void draw() override;
-		private:
-			void drawBorder(int width);
-			int mWidth;
-		};
-
-		// Related patterns:
-		// - adapter, compositor, strategy.
-
 		// ----------Bridge----------
 		// Handle/Body.
 		// Use when:
@@ -1421,6 +1369,288 @@ namespace patterns
 		// - chain of responsibilities
 		// - decorator
 		// - visitor
+		// - iterator
+
+		// ----------Decorator----------
+		// Wrapper
+		// Use when:
+		// - dynamically add new functionality (transparent to the client)
+		// - to implement responsibilities
+		// - when making subclasses is not convinient or possible.
+		// Results:
+		// +:
+		// - more flexible then inheritance.
+		// - avoids an overloaded function classes on the upper levels hierarchy.
+		// -:
+		// - decorator and its component aren't equel
+		// - lots of small objects
+		// Realisation
+		// - interfaces of decorator and component must be equal.
+		// - if only 1 additional functionality - no need in abstract decorator class.
+		// - Component classes lightweight, component class should be interface.
+		// - changes in appearance, but not the internal structure of the object.
+		// - decorators are transparent for components.
+
+		class VisualComponent
+		{
+		public:
+			virtual ~VisualComponent();
+
+			virtual void draw();
+			virtual void resize();
+		};
+
+		class Decorator :public VisualComponent
+		{
+		public:
+			Decorator(VisualComponent* vc);
+			void draw() override;
+			void resize() override;
+		private:
+			VisualComponent* mComponent;
+		};
+
+		class BorderDecorator : public Decorator
+		{
+		public:
+			BorderDecorator(VisualComponent* vc, int width);
+			void draw() override;
+		private:
+			void drawBorder(int width);
+			int mWidth;
+		};
+
+		// Related patterns:
+		// - adapter, compositor, strategy.
+
+		// Facade.
+		class CodeGenerator;
+		class ProgramNodeBuilder;
+		class Parser;
+		class Scanner;
+		class ByteCodeStream;
+
+		class Compiler
+		{
+		public:
+			Compiler();
+
+			void compile(std::istream&, ByteCodeStream&);
+		private:
+			/*CodeGenerator* mCodeGenerator;
+			ProgramNodeBuilder* mProgramNodeBuilder;
+			Parser* mParser;
+			Scanner* mScanner;*/
+		};
+
+		class Stream
+		{
+
+		};
+
+		class ByteCodeStream : public Stream
+		{
+
+		};
+
+		class StatementNode;
+		class ExpressionNode;
+
+		// Visitor example
+		class CodeGenerator
+		{
+		public:
+			virtual void visit(StatementNode*);
+			virtual void visit(ExpressionNode*);
+
+		protected:
+			CodeGenerator(ByteCodeStream&);
+
+		private:
+			ByteCodeStream& mOutput;
+		};
+
+		class StackMachineCodeGenerator : public CodeGenerator
+		{
+
+		};
+
+		class RISCCodeGenerator : public CodeGenerator
+		{
+		public:
+			RISCCodeGenerator(ByteCodeStream&);
+		};
+
+		class ProgramNode;
+
+		// Builder example
+		class ProgramNodeBuilder
+		{
+		public:
+			ProgramNodeBuilder();
+			virtual ProgramNode* newVariable(const std::string& variableName) const;
+			virtual ProgramNode* newAssignment(ProgramNode* variable, ProgramNode* expression) const;
+			virtual ProgramNode* newReturnStatement(ProgramNode* value) const;
+			virtual ProgramNode* newCondition(ProgramNode* condition, ProgramNode* truePart, ProgramNode* falsePart) const;
+
+			ProgramNode* getRootNode();
+		private:
+			ProgramNode* mProgramNode;
+		};
+
+		class Token;
+		class Symbol;
+
+		// Composition
+		class ProgramNode
+		{
+		public:
+			virtual void getSourcePosition(int& line, int& index);
+
+			virtual void add(ProgramNode*);
+			virtual void remove(ProgramNode*);
+
+			virtual void traverse(CodeGenerator&);
+		protected:
+			ProgramNode();
+		};
+
+		class StatementNode : public ProgramNode
+		{
+
+		};
+
+		class ExpressionNode : public ProgramNode
+		{
+		public:
+			void traverse(CodeGenerator&) override;
+		};
+
+		class VariableNode : public ProgramNode
+		{
+
+		};
+
+		class Parser
+		{
+		public:
+			Parser();
+			virtual ~Parser();
+
+			virtual void parse(Scanner&, ProgramNodeBuilder&);
+		};
+
+		class Scanner
+		{
+		public:
+			Scanner(std::istream&);
+			virtual ~Scanner();
+
+			virtual Token& scan();
+
+		private:
+			std::istream& mInputStream;
+		};
+
+		class Token
+		{
+
+		};
+
+		class Symbol
+		{
+
+		};
+		// Use when:
+		// - You want to provide a simple interface to a complex subsystem.
+		// - between clients and the implementation classes of abstraction there are many dependencies.
+		// - you want to expand the subsystem into separate layers.
+		// Results:
+		// - isolates clients from subsystem components, thereby reducing the number of objects that clients have to deal with and simplifying the work with the subsystem;
+		// - It allows ease connectivity between the subsystem and its clients.
+		// - facade does not preclude applications direct access to the subsystem classes if necessary.
+		// Realization.
+		// - reduction in the degree of relatedness of the client subsystem.
+		// - open and closed classes of subsystems.
+		// Related patterns:
+		// - abstract factory
+		// - mediator
+		// - singleton
+
+		// Flyweight
+		// Use when all below is:
+		// - The application uses a large number of objects
+		// - because of this overhead storage High
+		// - most of the state of objects can be taken outside
+		// - Many groups of objects can be replaced by relatively few shared objects as rendered structural condition
+		// - application does not depend on the identity of the object. Because objects can be separated by opportunists, then check on the identity of return "Truth" for conceptually distinct objects.
+		// Results:
+		// - decrease in the total number of copies;
+		// - reducing the amount of memory required to store the internal state;
+		// - calculation rather than an external storage status (if this is true).
+		// Realization:
+		// - the imposition of an external condition.
+		// - management of shared objects.
+
+		class Font;
+		class GlyphContext;
+		class Glyph
+		{
+		public:
+			virtual ~Glyph();
+			virtual void Draw(Window*, GlyphContext&);
+			virtual void SetFont(Font*, GlyphContext&);
+			virtual Font* GetFont(GlyphContext&);
+			virtual void First(GlyphContext&);
+			virtual void Next(GlyphContext&);
+			virtual bool IsDone(GlyphContext&);
+			virtual Glyph* Current(GlyphContext&);
+			virtual void Insert(Glyph*, GlyphContext&);
+			virtual void Remove(GlyphContext&);
+		protected:
+			Glyph();
+		};
+
+		class Character : public Glyph
+		{
+		public:
+			Character(char);
+			virtual void Draw(Window*, GlyphContext&);
+		private:
+			char _charcode;
+		};
+
+		class BTree;
+
+		class GlyphContext
+		{
+		public:
+			GlyphContext();
+			virtual ~GlyphContext();
+			virtual void Next(int step = 1);
+			virtual void Insert(int quantity = 1);
+			virtual Font* GetFont();
+			virtual void SetFont(Font*, int span = 1);
+		private:
+			int _index;
+			BTree* _fonts;
+		};
+
+		const int NCHARCODES = 128;
+		class GlyphFactory {
+		public:
+			GlyphFactory();
+			virtual ~GlyphFactory();
+			virtual Character* CreateCharacter(char);
+			//virtual Row* CreateRow();
+			//virtual Column* CreateColumn();
+		private:
+			Character* _character[NCHARCODES];
+		};
+		// Related patterns: composition, strategy.
+		// practice with Flyweight!!!.
+
+		// Proxy.
 	}
 
 	namespace chapter5

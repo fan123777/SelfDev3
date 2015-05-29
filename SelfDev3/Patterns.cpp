@@ -838,6 +838,32 @@ namespace patterns
 		{
 			impl->top();
 		}
+
+		// Decorator.
+
+		// Facade.
+		void Compiler::compile(std::istream& input, ByteCodeStream& output)
+		{
+			//Scanner scanner(input);
+			//ProgramNodeBuilder builder;
+			//Parser parser;
+
+			//parser.parse(scanner, builder);
+
+			//RISCCodeGenerator generator(output);
+			//ProgramNode* parseTree = builder.getRootNode();
+			//parseTree->traverse(generator);
+		}
+
+		void ExpressionNode::traverse(CodeGenerator& eg)
+		{
+			eg.visit(this);
+			//ListIterator<ProgramNode*> i(_children);
+			//for (i.First(); !i.IsDone(); i.NextO) {
+			//	i.Currentltem()->Traverse(eg);
+			//}
+		}
+
 	}
 
 	namespace chapter5
