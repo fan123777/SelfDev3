@@ -1721,15 +1721,174 @@ namespace patterns
 
 		// Chain of Responsibility
 		// we say that request has implicit receiver
+		// Use when:
+		// - there is more than one object that can process the request, and a real processor known in advance and must be found automatically;
+		// - you want to send a request to one of several objects without specifying obviously, what it is;
+		// - a set of objects that can process the request must be set dynamically.
+		// Results:
+		// - weakening of cohesion.
+		// - more flexibility in the allocation of responsibilities between objects.
+		// - receiving is not guaranteed.
+		// Realization:
+		// - implementation chain successors.
+		// - Connect successors.
+		// - the submission of requests.
 
+		typedef int Topic;
+		const Topic NO_HELP_TOPIC = -1;
 
+		class HelpHandler
+		{
+		public:
+			HelpHandler(HelpHandler* = nullptr, Topic = NO_HELP_TOPIC);
+			virtual bool hasHelp();
+			virtual void setHandler(HelpHandler*, Topic);
+			virtual void handleHelp();
 
+		private:
+			HelpHandler* _successor;
+			Topic _topic;
+		};
 
+		class MyWidget : public HelpHandler
+		{
+		protected:
+			MyWidget(MyWidget* parent, Topic t = NO_HELP_TOPIC);
+		private:
+			MyWidget* _parent;
+		};
 
+		class MyButton :public MyWidget
+		{
+		public:
+			MyButton(MyWidget* h, Topic t = NO_HELP_TOPIC);
+			void handleHelp() override;
+		};
 
+		class MyDialog : public MyWidget
+		{
+		public:
+			MyDialog(HelpHandler* h, Topic t = NO_HELP_TOPIC);
+			void handleHelp() override;
+		};
 
+		class MyApplication : public HelpHandler
+		{
+		public:
+			MyApplication(Topic t) :HelpHandler(0, t){}
+			void handleHelp() override;
+		};
 
+		const Topic PRINT_TOPIC = 1;
+		const Topic PAPER_ORIENTATION_TOPIC = 2;
+		const Topic APPLICATIONTOPIC = 3;
+		// Related patterns: Composite.
 
+		// Command.
+		// (Action, transaction)
+		// Use when:
+		// - parameterized to perform the actions in the case of the menu items Menultem
+		// - determine to queue and execute requests at different times.
+		// - to support the abolition of the operations.
+		// - support logging changes so they can be run again after the emergency stop system.
+		// - structure based system high level operations built from primitive.
+		// Relations:
+		// - the client creates an object Concrete Command and sets it to the recipient;
+		// - Invoker object stores the initiator ConcreteCommand;
+		// - the initiator sends a request, causing the operation command Execute. if supported the abolition of the executed actions, ConcreteCommand before calling Execute saves state information sufficient for rollback;
+		// - ConcreteCommand operation object is the recipient for the request.
+		// Results:
+		// - command breaks the connection between the object of initiating the operation, and the object that has information on how to execute it;
+		// - Commands - are very real objects. Allowed to manipulate them and expand them in the same way as with any other objects;
+		// - simple commands, you can gather the components, such as the class of Macro Command, discussed above. In general, the compound commands described layout pattern;
+		// - easy to add new commands, as no existing classes do not need to change.
+		// Realisation:
+		// - how "smart" should be a command.
+		// - Support undo and redo operations.
+		// - how to avoid accumulation of errors in the process of cancel.
+		// - the use of templates in C++.
+
+		class Command
+		{
+		public:
+			virtual ~Command(){};
+			virtual void execute() = 0;
+		protected:
+			Command(){};
+		};
+
+		class Document
+		{
+		public:
+			Document(const std::string& name){};
+			void open(){};
+			void paste(){};
+		};
+
+		class Application
+		{
+		public:
+			void addDocument(Document* document){};
+		};
+
+		class OpenCommand : public Command
+		{
+		public:
+			OpenCommand(Application* app);
+			void execute() override;
+		protected:
+			virtual const std::string& askUser();
+		private:
+			Application* mApplication;
+			std::string mResponse;
+		};
+
+		class PasteCommand : public Command
+		{
+		public:
+			PasteCommand(Document* document);
+			void execute() override;
+		private:
+			Document* mDocument;
+		};
+
+		template<typename Receiver>
+		class SimpleCommand :public Command
+		{
+		public:
+			//	typedef void (Receiver::* r Action)();
+			//	SimpleCommand(Receiver* r, Action a)
+			//		:mReceiver(r), mAction(a)
+			//	{
+
+			//	}
+
+			//	void execute() override
+			//	{
+			//		mReceiver->*mAction();
+			//	}
+
+			//private:
+			//	Action mAction;
+			//	Receiver* mReceiver;
+		};
+
+		class MacroCommand : public Command
+		{
+		public:
+			MacroCommand();
+			virtual ~MacroCommand();
+			virtual void add(Command*);
+			virtual void remove(Command*);
+			void execute() override; // execute all commands from the list
+		private:
+			std::list<Command*> mCommands;
+		};
+		// Related patterns:
+		// composition, memento, prototype.
+
+		// Interpreter
+		// !!!
 
 		// ----------Observer(dependents, publisher-subscriber)----------
 		// Use when:
@@ -1909,109 +2068,6 @@ namespace patterns
 		// Strategy: ...
 		// Observer: ...
 		// MVC: ...
-
-		// Command.
-		// (Action, transaction)
-		// Use when:
-		// - parameterized to perform the actions in the case of the menu items Menultem
-		// - determine to queue and execute requests at different times.
-		// - to support the abolition of the operations.
-		// - support logging changes so they can be run again after the emergency stop system.
-		// - structure based system high level operations built from primitive.
-		// Relations:
-		// - the client creates an object Concrete Command and sets it to the recipient;
-		// - Invoker object stores the initiator ConcreteCommand;
-		// - the initiator sends a request, causing the operation command Execute. if supported the abolition of the executed actions, ConcreteCommand before calling Execute saves state information sufficient for rollback;
-		// - ConcreteCommand operation object is the recipient for the request.
-		// Results:
-		// - command breaks the connection between the object of initiating the operation, and the object that has information on how to execute it;
-		// - Commands - are very real objects. Allowed to manipulate them and expand them in the same way as with any other objects;
-		// - simple commands, you can gather the components, such as the class of Macro Command, discussed above. In general, the compound commands described layout pattern;
-		// - easy to add new commands, as no existing classes do not need to change.
-		// Realisation:
-		// - how "smart" should be a command.
-		// - Support undo and redo operations.
-		// - how to avoid accumulation of errors in the process of cancel.
-		// - the use of templates in C++.
-		
-		class Command
-		{
-		public:
-			virtual ~Command(){};
-			virtual void execute() = 0;
-		protected:
-			Command(){};
-		};
-
-		class Document
-		{
-		public:
-			Document(const std::string& name){};
-			void open(){};
-			void paste(){};
-		};
-
-		class Application
-		{
-		public:
-			void addDocument(Document* document){};
-		};
-
-		class OpenCommand : public Command
-		{
-		public:
-			OpenCommand(Application* app);
-			void execute() override;
-		protected:
-			virtual const std::string& askUser();
-		private:
-			Application* mApplication;
-			std::string mResponse;
-		};
-
-		class PasteCommand : public Command
-		{
-		public:
-			PasteCommand(Document* document);
-			void execute() override;
-		private:
-			Document* mDocument;
-		};
-
-		template<typename Receiver>
-		class SimpleCommand:public Command
-		{
-		public:
-		//	typedef void (Receiver::* r Action)();
-		//	SimpleCommand(Receiver* r, Action a)
-		//		:mReceiver(r), mAction(a)
-		//	{
-
-		//	}
-
-		//	void execute() override
-		//	{
-		//		mReceiver->*mAction();
-		//	}
-
-		//private:
-		//	Action mAction;
-		//	Receiver* mReceiver;
-		};
-
-		class MacroCommand : public Command
-		{
-		public:
-			MacroCommand();
-			virtual ~MacroCommand();
-			virtual void add(Command*);
-			virtual void remove(Command*);
-			void execute() override; // execute all commands from the list
-		private:
-			std::list<Command*> mCommands;
-		};
-		// Related patterns:
-		// composition, memento, prototype.
 
 		// Iterator(Cursor)
 		// Use when:

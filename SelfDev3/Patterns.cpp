@@ -891,6 +891,14 @@ namespace patterns
 	{
 		void main()
 		{
+			// Chain of Responsibility
+
+			MyApplication* application = new MyApplication(APPLICATIONTOPIC);
+			MyDialog* dialog = new MyDialog(application, PRINT_TOPIC);
+			MyButton* button = new MyButton(dialog, PAPER_ORIENTATION_TOPIC);
+
+			button->handleHelp();
+
 			// Observer
 			//ClockTimer ct;
 			//DigitalClock dc(&ct);
@@ -926,15 +934,108 @@ namespace patterns
 		}
 
 		// Chain of Responsibility
+		HelpHandler::HelpHandler(HelpHandler* h, Topic t)
+			:_successor(h),
+			_topic(t)
+		{
+		}
 
+		bool HelpHandler::hasHelp()
+		{
+			return _topic != NO_HELP_TOPIC;
+		}
 
+		void HelpHandler::handleHelp()
+		{
+			if (_successor != nullptr)
+				_successor->handleHelp();
+		}
 
+		void HelpHandler::setHandler(HelpHandler* h, Topic t)
+		{
+			_successor = h;
+			_topic = t;
+		}
 
+		MyWidget::MyWidget(MyWidget* parent, Topic t)
+			:HelpHandler(parent, t),
+			_parent(parent)
+		{
 
+		}
 
+		MyButton::MyButton(MyWidget* h, Topic t)
+			:MyWidget(h, t)
+		{
+		}
 
+		void MyButton::handleHelp()
+		{
+			if (hasHelp())
+			{
 
+			}
+			else
+				HelpHandler::handleHelp();
+		}
 
+		MyDialog::MyDialog(HelpHandler* h, Topic t)
+			: MyWidget(nullptr)
+		{
+			setHandler(h, t);
+		}
+
+		void MyDialog::handleHelp()
+		{
+			if (hasHelp())
+			{
+
+			}
+			else
+			{
+				HelpHandler::handleHelp();
+			}
+		}
+
+		void MyApplication::handleHelp()
+		{
+
+		}
+
+		// Command
+		OpenCommand::OpenCommand(Application* app)
+			:mApplication(app)
+		{
+
+		}
+
+		void OpenCommand::execute()
+		{
+			string name = askUser();
+			if (name.empty() == false)
+			{
+				Document* document = new Document(name);
+				mApplication->addDocument(document);
+				document->open();
+			}
+		}
+
+		const std::string& OpenCommand::askUser()
+		{
+			return mResponse;
+		}
+
+		// PasteCommand
+		PasteCommand::PasteCommand(Document* document)
+			:mDocument(document)
+		{
+
+		}
+
+		void PasteCommand::execute()
+		{
+			mDocument->paste();
+		}
 
 		// Observer
 		// Subject
@@ -1039,41 +1140,6 @@ namespace patterns
 		void Composition::repair()
 		{
 			mCompositor->Compose();
-		}
-
-		// Command
-		OpenCommand::OpenCommand(Application* app)
-			:mApplication(app)
-		{
-
-		}
-
-		void OpenCommand::execute()
-		{
-			string name = askUser();
-			if (name.empty() == false)
-			{
-				Document* document = new Document(name);
-				mApplication->addDocument(document);
-				document->open();
-			}
-		}
-
-		const std::string& OpenCommand::askUser()
-		{
-			return mResponse;
-		}
-
-		// PasteCommand
-		PasteCommand::PasteCommand(Document* document)
-			:mDocument(document)
-		{
-
-		}
-
-		void PasteCommand::execute()
-		{
-			mDocument->paste();
 		}
 
 		// Iterator
