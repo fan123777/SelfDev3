@@ -78,11 +78,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ASystemOfPatterns.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Patterns.cpp" />
     <ClCompile Include="SNMP.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ASystemOfPatterns.h" />
     <ClInclude Include="Patterns.h" />
     <ClInclude Include="SNMP.h" />
   </ItemGroup>

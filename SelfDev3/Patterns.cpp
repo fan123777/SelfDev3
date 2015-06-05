@@ -899,6 +899,13 @@ namespace patterns
 
 			button->handleHelp();
 
+			// Commnad
+			//MyClass receiver;
+			//Command* c = new SimpleCommand<MyClass>(receiver, &MyClass::action);
+			// c->execute;
+
+			// Interpreter
+
 			// Observer
 			//ClockTimer ct;
 			//DigitalClock dc(&ct);
@@ -910,11 +917,6 @@ namespace patterns
 //			Composition* quick = new Composition(new SimpleCompositor);
 //			Composition* slick = new Composition(new TeXCompositor);
 //			Composition* iconic = new Composition(new ArrayCompositor(100));
-
-			// Commnad
-			//MyClass receiver;
-			//Command* c = new SimpleCommand<MyClass>(receiver, &MyClass::action);
-			// c->execute;
 
 			// Iterator
 			//List <Employee*>* employees;
@@ -930,7 +932,6 @@ namespace patterns
 			//AbstractList<Employee*>* employees;
 			//IteraratorPtr<Employee*> iterator(employees->CreateIterator());
 			//printEmployees(*iterator);
-
 		}
 
 		// Chain of Responsibility
@@ -1035,6 +1036,58 @@ namespace patterns
 		void PasteCommand::execute()
 		{
 			mDocument->paste();
+		}
+
+		// Interpreter
+		VariableExp::VariableExp(const std::string& name)
+			:_name(name)
+		{
+
+		}
+
+		bool VariableExp::evaluate(Context& c)
+		{
+			return c.lookup(_name);
+		}
+
+		BooleanExp* VariableExp::copy() const
+		{
+			return new VariableExp(_name);
+		}
+
+		BooleanExp* VariableExp::replace(const std::string& name, BooleanExp& exp)
+		{
+			if (!_name.empty())
+				return exp.copy();
+			else
+				return new VariableExp(_name);
+		}
+
+		AndExp::AndExp(BooleanExp* opl, BooleanExp* op2)
+		{
+			_operandl = opl;
+			_operand2 = op2;
+		}
+
+		bool AndExp::evaluate(Context& aContext)
+		{
+			return
+				_operandl->evaluate(aContext) &&
+				_operand2->evaluate(aContext);
+		}
+
+		BooleanExp* AndExp::copy() const
+		{
+			return
+				new AndExp(_operandl->copy(), _operand2->copy());
+		}
+		BooleanExp* AndExp::replace(const std::string& name, BooleanExp& exp)
+		{
+			return
+				new AndExp(
+				_operandl->replace(name, exp),
+				_operand2->replace(name, exp)
+				);
 		}
 
 		// Observer
@@ -1148,7 +1201,7 @@ namespace patterns
 			for (i.first(); !i.isDone(); i.next())
 				i.current()->print();
 		}
-
+		
 		// CompositeEquipment
 		Currency CompositeEquipment::netPrice()
 		{
@@ -1162,6 +1215,73 @@ namespace patterns
 		{
 			//			visitor->visitFloppyDisk(this);
 		}
+
+		// Mediator
+		void Widget1::changed()
+		{
+			_director->widgetChanged(this);
+		}
+
+		void Button::handleMouse()
+		{
+			changed();
+		}
+
+		void FontDialogDirector::createWidets()
+		{
+			//_ok = new Button(this);
+			//_cancel = new Button(this);
+			//_fontList = new ListBox(this);
+			//_fontName = new EntryField(this);
+		}
+
+		void FontDialogDirector::widgetChanged(Widget1* theChangedWidget)
+		{
+			if (theChangedWidget == _fontList)
+				_fontName->setText(_fontList->getSelection());
+			else if (theChangedWidget == _ok)
+			{
+			}
+			else if (theChangedWidget == _cancel)
+			{
+			}
+		}
+
+		// Memento.
+		void MoveCommand::execute()
+		{
+			//ConstraintSolver * solver = ConstraintSolver::Instance();
+			//_state = solver->createMemento();
+			////_target->move(_delta);
+			//solver->solve();
+		}
+
+		void MoveCommand::unExecute()
+		{
+			//ConstraintSolver* solver = ConstraintSolver::Instance();
+			//_target->move(-_delta);
+			//solver->setMemento(_state);
+			//solver->solve();
+		}
+
+		// State
+		void TCPConnection::open()
+		{
+			_state->open();
+		}
+
+		void TCPConnection::close()
+		{
+
+		}
+
+		void TCPConnection::acknowledge()
+		{
+
+		}
+
+		// Template Method
+
 	}
 
 	namespace chapter6

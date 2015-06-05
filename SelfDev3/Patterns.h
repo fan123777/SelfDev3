@@ -1888,7 +1888,74 @@ namespace patterns
 		// composition, memento, prototype.
 
 		// Interpreter
-		// !!!
+		// Use when:
+		// - Use the pattern interpreter when there is a language for interpreting, proposals which can be represented as abstract syntax trees.
+		// - grammar is simple.
+		// - efficiency is not the main criterion.
+		// Results.
+		// - grammar is easy to modify and expand.
+		// - simple implementation of grammar.
+		// - complex grammar is difficult to maintain.
+		// - adding new ways to interpret expressions.
+		// Realization:
+		// - creating an abstract syntax tree.
+		// - the definition of operation Interpret.
+		// separation of terminal symbols with the pattern trimmer.
+
+		class Context;
+
+		class BooleanExp
+		{
+		public:
+			BooleanExp(){};
+			virtual ~BooleanExp(){};
+			virtual bool evaluate(Context&) = 0;
+			virtual BooleanExp* replace(const std::string&, BooleanExp&) = 0;
+			virtual BooleanExp* copy() const = 0;
+		};
+
+		class VariableExp;
+
+		class Context
+		{
+		public:
+			bool lookup(const std::string&) const
+			{
+				return true;
+			}
+			void assign(VariableExp*, bool)
+			{
+
+			}
+		};
+
+		class VariableExp:public BooleanExp
+		{
+		public:
+			VariableExp(const std::string&);
+			virtual ~VariableExp(){};
+			bool evaluate(Context&) override;
+			BooleanExp* replace(const std::string&, BooleanExp&) override;
+			BooleanExp* copy() const override;
+		private:
+			std::string _name;
+		};
+
+		class AndExp : public BooleanExp
+		{
+		public:
+			AndExp(BooleanExp*, BooleanExp*);
+			virtual ~AndExp(){};
+			bool evaluate(Context&) override;
+			BooleanExp* replace(const std::string&, BooleanExp&) override;
+			BooleanExp* copy() const override;
+		private:
+			BooleanExp* _operandl;
+			BooleanExp* _operand2;
+		};
+
+		// Related patterns:
+		// - composition, trimmer, iterator, visitor.
 
 		// ----------Observer(dependents, publisher-subscriber)----------
 		// Use when:
@@ -2194,6 +2261,93 @@ namespace patterns
 		};
 		// Related patterns: compositor, factory method, memento.
 		
+		// Mediator.
+		// Use when:
+		// - There are objects, communications between them are complex and clearly defined.
+		// - an object can not be reused because it communicates with many other objects.
+		// - behavior, distributed between several classes should resist the setting up without generating a plurality of subclasses.
+		// Results:
+		// - reduces the number of generated subclasses.
+		// - eliminates the coupling between colleagues.
+		// - facilitates communication protocols objects.
+		// - It abstracts the way to cooperation projects.
+		// - centralizes management.
+		// Realization.
+		// - deliverance from the abstract class Mediator.
+		// - the exchange of information between colleagues and intermediaries.
+
+		class Widget1;
+
+		class DialogDirector
+		{
+		public:
+			virtual ~DialogDirector();
+
+			virtual void showDialog();
+			virtual void widgetChanged(Widget1*) = 0;
+
+		protected:
+			DialogDirector();
+			virtual void createWidets() = 0;
+		};
+
+		class Widget1
+		{
+		public:
+			Widget1(DialogDirector*);
+			virtual void changed();
+
+			virtual void handleMouse();
+
+		private:
+			DialogDirector* _director;
+		};
+
+		class ListBox :public Widget1
+		{
+		public:
+			ListBox(DialogDirector*);
+
+			virtual const std::string& getSelection();
+			virtual void setList(const std::list<std::string>& items);
+			void handleMouse() override;
+		};
+
+		class EntryField : public Widget1
+		{
+		public:
+			EntryField(DialogDirector*);
+			virtual void setText(const std::string& text);
+			virtual const std::string& getText();
+			void handleMouse() override;
+		};
+
+		class Button :public Widget1
+		{
+		public:
+			Button(DialogDirector*);
+			virtual void setText(const std::string& text);
+			void handleMouse() override;
+		};
+
+		class FontDialogDirector :public DialogDirector
+		{
+		public:
+			FontDialogDirector();
+			virtual ~FontDialogDirector();
+
+			void widgetChanged(Widget1*) override;
+
+		protected:
+			void createWidets() override;
+
+		private:
+			Button* _ok;
+			Button* _cancel;
+			ListBox* _fontList;
+			EntryField* _fontName;
+		};
+
 		// Visitor.
 		// Use when:
 		// - the structure also contains objects of many classes with different interfaces and you want to perform operations on them, depending on the specific classes;
@@ -2209,6 +2363,93 @@ namespace patterns
 		// Realization:
 		// - double dispatch.
 		// - What part is responsible for bypassing the structure.
+		// Related Patterns:
+		// - facade.
+		// - observer.
+
+		// Memento(Token).
+		// Use when:
+		// - to save a snapshot of an object (or part thereof), subsequently to the object can be reconstructed in the same state;
+		// - direct receipt of this condition reveals implementation details and breaks encapsulation facility.
+		// Results:
+		// - preservation of boundaries encapsulation.
+		// - simplification of the structure of the host.
+		// - significant costs when using custodians.
+		// - the definition of "narrow" and "broad" interfaces.
+		// - the hidden charge for the content of the keeper.
+		// Realization:
+		// - language support.
+		class State;
+		class Memento;
+
+		class Originator
+		{
+		public:
+			Memento* createMemento();
+			void setMemento(const Memento*);
+		private:
+			State* _state;
+		};
+
+		class Memento
+		{
+		public:
+			virtual ~Memento();
+		private:
+			friend class Originator;
+			Memento();
+
+			void setState(State*);
+			State* getState();
+
+		private:
+			State* _state;
+		};
+		// - preservation of the increment of change.
+
+		class Graphic;
+		class Point;
+		class ConstraintSolverMemento;
+
+		class MoveCommand
+		{
+		public:
+			MoveCommand(Graphic* target, const Point& delta);
+			void execute();
+			void unExecute();
+
+		private:
+			ConstraintSolverMemento * _state;
+			Point* _delta;
+			Graphic* _target;
+		};
+
+		class ConstraintSolver
+		{
+		public:
+			static ConstraintSolver* Instance();
+			void solve();
+
+			void addCostraint(Graphic* startConnection, Graphic* endConnection);
+			void removeCostraint(Graphic* startConnection, Graphic* endConnection);
+
+			ConstraintSolverMemento* createMemento();
+			void setMemento(ConstraintSolverMemento*);
+
+		private:
+
+		};
+
+		class ConstraintSolverMemento
+		{
+		public:
+			virtual ~ConstraintSolverMemento();
+		private:
+			friend class ConstraintSolver;
+			ConstraintSolverMemento();
+		};
+		// Related Patterns:
+		// Commnad, Iterator.
 
 		// from previous chapter
 		typedef int Watt;
@@ -2290,6 +2531,68 @@ namespace patterns
 		};
 
 		// Related patterns: composite, interpreter.
+
+		// State.
+		class TCPState;
+
+		class TCPConnection
+		{
+		public:
+			void open();
+			void close();
+			void acknowledge();
+		private:
+			TCPState* _state;
+		};
+
+		class TCPState
+		{
+		public:
+			virtual void open();
+			virtual void close();
+			virtual void acknowledge();
+		};
+
+		class TCPEstablished :public TCPState
+		{
+		public:
+			void open() override;
+			void close() override;
+			void acknowledge() override;
+		};
+		// Use when:
+		// - when the behavior of an object depends on its condition and needs change over lead time;
+		// - when operations occur in the code consisting of many conditional branches operators.
+		// Results:
+		// - localizes state-dependent behavior, and divides it into parts corresponding corresponding states.
+		// - It is making clear transitions between states.
+		// - state objects can be separated.
+		// Realization:
+		// - what defines the transitions between states.
+		// - tabular alternative.
+		// - the creation and destruction of objects of the state.
+		// - the use of dynamic inheritance.
+		// Related Patterns:
+		// - trimmer.
+		// - state.
+
+		// Template Method
+		// Use when:
+		// - once to use the invariant part of the algorithm, leaving implementation to the discretion of the changing behavior of subclasses;
+		// - when you need to isolate and localize in the same class behavior, general all subclasses to avoid duplicating code.
+		// - to control subclasses extensions.
+		// Realization:
+		// - use of access control in C++.
+		// - reducing the number of basic operations.
+		// - naming convention.
+		// Related patterns: template method, strategy.
+
+		// Discussion of the behavior patterns
+		// Encapsulation variations
+		// - Generally, the patterns of behavior determined abstract class with which the object is described by encapsulating
+		// - Objects as arguments.
+		// - Should the exchange of information to be encapsulated or distributed.
+		// - Separation of senders and recipients.
 	}
 
 	namespace chapter6
