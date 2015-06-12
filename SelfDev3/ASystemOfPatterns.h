@@ -458,8 +458,106 @@ namespace system_of_patterns
 // 5. Design the broker component in parallel with steps 3 and 4.
 // 5.1. Specify a detailed on-the-wire protocol for interacting with client-side proxies and server - side proxies.
 // 5.2. A local broker must be available for every participating machine in the network.
+// 5.3. When a client invokes a method of a server, the Broker system is responsible for returning all results and exceptions back to the original client
+// 5.4. If the proxies (see step 4) do not provide mechanisms for marshaling and unmarshaling parameters and results, you must include that functionality in the broker component.
+// 5.5. If your system supports asynchronous communication between clients and servers, you need to provide message buffers within the broker or within the proxies for the temporary storage of messages.
+// 5.6. Include a directory service for associating local server identifiers with the physical location of the corresponding servers in the broker.
+// if the underlying inter-process communication protocol is based on TCP / IP, you could use an Internet port number as the physical server location.
+// 5.7. When your architecture requires system-unique identifiers to be generated dynamically during server registration, the broker must offer a name service for instantiating such names
+// 5.8. If your system supports dynamic method invocation (see step 3), the broker needs some means for maintaining type information about existing servers.
+// 5.9. Consider the case in which something fails. In a distributed system two levels of errors may occur :
+// 1) A component such as a server may run into an error condition.
+// 2) The communication between two independent processes may fail.
+// 6. Develop IDL compilers.
+// When many programming languages are in use, it is best to develop the compiler as afrarnework that allows the developer to add his own code generators.
+// EXAMPLE RESOLVED.
+// VARIANTS:
+// - Dtrect Communication Broker System.
+// - Message Passing Broker System.
+// - Trader System.
+// - Adapter Broker System.
+// - Callback Broker System.
+// KNOWN USES:
+// - CORBA.
+// - IBM SOM/DSOM.
+// - Microsoft's OLE 2.x.
+// - WWW
+// - ATM-P
+// CONSEQUENCES:
+// benefits:
+// - Location Transparency.
+// - Changeability and extensibility of components.
+// - Portability of a Broker system. Use Layers so you need to port only low-level system specific part.
+// - Interoperability between dzflerent Broker systems.
+// - Reusability.
+// liabilities:
+// - Restricted emiency.
+// - Lower fault tolerance.
+// The following aspect gives benefits as well as liabilities:
+// Testing and Debugging:
+// SEE ALSO:
+// - The Forwarder-Receiver pattern encapsulates inter-process communication between two components.
+// - The Proxy pattern.
+// - The Client-DispatcherServer pattern is a lightweight version of the Direct Communication Broker variant.
+// - The Mediator design pattern replaces a web of inter-object connections by a star configuration in which the central mediator component encapsulates collective behavior by defining a common interface for communicating with objects.
 
+// 2.4 Interactive Systems
+// the challenge is to keep the functional core independent of the user interface.
+// 2 patterns for interactive systems:
+// - The Model-View-Controller pattern (MVC) divides an interactive application into three components.
+// - The Presentation-Abstraction-Control pattern (PAC) defines a structure for interactive software systems in the form of a hierarchy of cooperating agents.
 
+// MODEL-VIEV-CONTROLLER.
+// The model contains the core functionality and data.Views display information to the user. Controllers handle user input.
+// CONTEXT:
+// - Interactive applications with a flexible human-computer interface.
+// PROBLEM:
+// User interfaces are especially prone to change requests.
+// forces:
+// - The same information is presented differently in different windows, for example, in a bar or pie chart.
+// - The display and behavior of the application must reflect data manipulations immediately.
+// - Changes to the user interface should be easy, and even possible at run - time.
+// - Supporting different 'look and feel' standards or porting the user interface should not affect code in the core of the application.
+// SOLUTION:
+// MVC divides an interactive application into the three areas : processing, output, and input.
+// Publisher-Subscriber pattern.
+// STRUCTURE:
+// The model component contains the functional core of the application.
+// class Model
+// responsibility:
+// - Provides functional core of the application.
+// - Registers dependent views and controllers.
+// - Notifies dependent components about data changes.
+// collaborators:
+// - View
+// - Controller
+// View components present information to the user.
+// class View
+// Responsibility:
+// - Creates and initializes its associated controller.
+// - Displays information to the user.
+// - Implements the update procedure.
+// - Retrieves data from the model.
+// Collaborators:
+// - Controller
+// - Model
+// The controller components accept user input as events.
+// class Controller
+// Responsibility:
+// - Accepts user input as events.
+// - Translates events to service requests for the model or display requests for the view.
+// - Implements the update procedure, if required.
+// Collaborators:
+// - View
+// - Model
+
+class Observer
+{
+public:
+	virtual void update() = 0;
+};
+
+// practice with all patterns, learn something new if needed. !!!
 
 
 
