@@ -1,7 +1,9 @@
 #pragma once
 
 #include<iostream>
+#include<string>
 #include<list>
+#include<map>
 
 namespace system_of_patterns
 {
@@ -557,9 +559,149 @@ public:
 	virtual void update() = 0;
 };
 
+class Model;
+class Controller;
+
+class Event
+{
+
+};
+
+class View : public Observer
+{
+public:
+	View(Model* m);
+	virtual ~View();
+
+	void update() override;
+
+	virtual void initialize();
+	virtual void draw();
+	virtual Controller* makeController();
+
+	Model * getModel();
+	Controller* getController();
+
+	virtual Controller* setController(Controller* c);
+
+private:
+	Model* _model;
+	Controller* _controller;
+};
+
+class Controller : public Observer
+{
+public:
+	Controller(View* v);
+	virtual ~Controller();
+
+	void update() override;
+
+//	void initialize(Model* m, View* v);
+	virtual void handleEvent(Event* e);
+
+protected:
+	Model* _model;
+	View* _view;
+};
+
+class Model
+{
+public:
+	void attach(Observer* o);
+	void detach(Observer* o);
+
+protected:
+	void notify();
+
+private:
+	std::list<Observer*> _observers;
+	Model* _model;
+	Controller* _controller;
+};
+// DYNAMICS:
+// several scenarios.
+// IMPLEMENTATION:
+// 1. Separate human-computer interactionfrom core functionality.
+class VotesModel : public Model
+{
+public:
+	VotesModel(const std::map<std::string, int>& votes);
+	void clearVotes();
+	void changeVote(const std::string& vote, int value);
+private:
+	std::map<std::string, int> _votes;
+};
+// 2. Implement the change-propagation mechanism.
+// 3. Design and implement the views.
+class BarChartView : public View
+{
+public:
+	BarChartView(Model *m)
+		: View(m)
+	{}
+
+	// shows data as BarChart
+	void draw() override
+	{}
+};
+// 4. Design and implement the controllers.
+// For example, the controller may register its eventhandling procedure with the window system as a callback.
+// 5. Design and implement the view-controller relationship.
+class TableView;
+class TableController : public Controller
+{
+public:
+	TableController(TableView *tv);
+	void handleEvent(Event *e) override;
+};
+
+class TableView : public View
+{
+public:
+	TableView(Model *m);
+	void draw() override;
+	Controller* makeController() override;
+};
+// 6. Implement the set-up of MVC.
+// 7. Dynamic view creation.
+// Apply the View Handler design pattern
+// 8. 'Pluggable controllers.
+// 9. Infrastructure for hierarchical views and controllers.
+// Apply the Composite pattern to create hierarchically composed views.
+// If multiple views are active simultaneously Use the Chain of Responsibility pattern to manage this delegation of events.
+// 10. Further decoupling from system dependencies.
+// you can use Bridge to make it system independent.
+// VARIANTS:
+// Document - View.
+// combine the responsibilities of the view and the controller from MVC in a single component.
+// KNOWN USES:
+// - Smalltalk
+// - MFC
+// - ET++
+
+// CONSEQUENCES:
+// benefits:
+// - Multiple views of the same model.
+// - Synchronized views.
+// - 'Pluggable' views and controllers.
+// - Exchangeability of 'look and feel'.
+// - Framework potential.
+// liabilities:
+// - Increased complexity.
+// - Potential for excessive number of updates.
+// - Intimate connection between view and controller.
+// - Close coupling of views and controllers to a model.
+// apply the Command Processor pattern to resolve.
+// - Inefficiency of data access in view.
+// - Inevitability of change to view and controller when porting.
+// - Difficulty of using MVC with modern user-interface tools.
+// user interface tools provides lots of ways to show gui.
+// SEE ALSO:
+// - Presentation-Abstraction-Control.
+
+// Presentation-Abstraction-Control
+
 // practice with all patterns, learn something new if needed. !!!
-
-
-
 	}
 }
