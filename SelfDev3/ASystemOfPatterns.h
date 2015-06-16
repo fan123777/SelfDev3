@@ -701,6 +701,10 @@ public:
 // - Presentation-Abstraction-Control.
 
 // Presentation-Abstraction-Control
+// The Presentation - Abstraction - Control architectural pattern(PAC) defines a structure for interactive software systems in the form of a hierarchy of cooperating agents.
+
+
+
 
 // practice with all patterns, learn something new if needed. !!!
 	}
