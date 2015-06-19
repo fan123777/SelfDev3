@@ -702,6 +702,161 @@ public:
 
 // Presentation-Abstraction-Control
 // The Presentation - Abstraction - Control architectural pattern(PAC) defines a structure for interactive software systems in the form of a hierarchy of cooperating agents.
+// EXAMPLE:
+// CONTEXT:
+// Development of an interactive application with the help of agents.
+// PROBLEM:
+// each agent is specialized for a specific task, and all agents together provide the system functionality.
+// forces:
+// - However, individual agents must effectively cooperate to provide the overall task of the application.
+// - Interactive agents provide their own user interface, since their respective human - computer interactions often differ widely.
+// - Systems evolve over time.
+// Changes to individual agents, or the extension of the system with new agents, should not affect the whole system.
+// SOLUTION:
+// - Structure the interactive application as a tree-like hierarchy of PAC agents.There should be one top - level agent, several intermediatelevel agents, and even more bottom - level agents.
+// each agent has 3 components: presentation, abstraction, and control.
+// The agent's presentation component provides the visible behavior of the PAC agent.Its abstraction component maintains the data model that underlies the agent, and provides functionality that operates on this data.Its control component connects the presentation and abstraction components, and provides fimctionality that allows the agent to communicate with other PAC agents.
+// - The top-level PAC agent provides the functional core of the system.
+// - Bottom-level PAC agents represent self-contained semantic concepts
+// - Intermediate-level PAC agents represent either combinations of, or relationships between, lower - level agents.
+// STRUCTURE:
+// The control component of the top-level PAC agent has three responsibilities:
+// - It allows lower-level agents to make use of the services of the toplevel agents, mostly to access and manipulate the global data model.
+// - It coordinates the hierarchy of PAC agents.
+// - It maintains information about the interaction of the user with the system.
+// Bottom-level PAC agents represent a specific semantic concept of the application domain.
+// Intermediate-Level PAC agents can fulfill two different roles: composition and coordination.
+
+// class: Top-level Agent
+// Responsibility:
+// - Provides the functional core of the system.
+// - Controls the PAC hierarchy.
+// Collaborators:
+// Intermediate-level Agent
+// - Bottom-level Agent
+
+// class: Interm. -level Agent
+// Responsibility:
+// - Coordinates lowerlevel PAC agents.
+// - Composes lowerlevel PAC agents to a single unit of higher abstraction.
+// Collaborators:
+// - Top-level Agent
+// - Intermediatelevel Agent
+// - Bottom-level Agent
+// Responsibility:
+// - Provides a speciflc view of the software or a system service, including its associated human - computer interaction.
+// Collaborators:
+// - Top-level Agent
+// - Intermediate level Agent
+
+// We keep the interfaces of PAC agents small by applying the Composite Message pattern.
+
+// DYNAMICS:
+// IMPLEMENTATION:
+// 1. Define a model of the application.
+// - Which services should the system provide ?
+// - Which components can fulfill these services ?
+// - What are the relationships between components ?
+// - How do the components collaborate ?
+// - What data do the components operate on ?
+// - How will the user interact with the software ?
+// 2. Define a general strategy for organizing the PAC hierarchy.
+// rule of lowest common ancestor.
+// consider is the depth of the hierarchy.
+// 3. SpeciA the top-level PAC agent.
+// 4. Spectfy the bottom-level PAC agents.
+// 5. Speclh bottom-level PAC agents for system services.
+// 6. Specify intermediate-level PAC agents to compose lower-level PAC agents.
+// 7. Specih intermediate-level PAC agents to coordinate lower-level PAC agents.
+// 8. Separate core functionality from human-computer interaction.
+// You can provide a unified interface to the abstraction and presentation components of a PAC agent by applying the Facade pattern.
+// You can apply the Command Processor pattern to further organize the presentation component.
+// The control component is implemented  as an Adapter.
+// 9. Rovide the external interface.
+// the control component is a mediator you may use the Mediator pattern.
+// One way of implementing communication with other agents is to apply the Composite Message pattern.
+// Publisher-Subscriber pattern.
+// 10. Link the hierarchy together.
+// VARIANTS:
+// - PAC agents as actiue objects.
+// Design patterns like Active Object and Half - Sync / Half - Async can help you implement such an architecture.
+// - PAC agents as processes.
+// use proxies to locally represent remote PAC agents.
+// - Use the Forwarder-Receiver pattern or the Client-Dispatcher-Server pattern to implement the interprocess communication.
+// KNOWN USES:
+// - Network Traffic Management.
+// - Mobile Robot.
+// CONSEQUENCES:
+// benefits:
+// - Separation of concerns.
+// - Supportfor change and extension.
+// - Support for multi - tasking.
+// liabilities:
+// - Increased system complexity.
+// - Complex control component.
+// - Eficiency.
+// - Applicability.
+// See also:
+// - Model-View-Controller.
+
+// 2.5 Adaptable Systems
+// Systems evolve over time-new functionality is added and existing services are changed.
+// - The Microkernel pattern.
+// - The Reflection pattern.
+
+// Microkernel.
+// The Microkernel architectural pattern applies to software systems that must be able to adapt to changing system requirements.It separates a minimal functional core from extended functionality and customer - specific parts.The microkernel also sexves as a socket for plugging in these extensions and coordinating their collaboration.
+// EXAMPLE:
+// Suppose we intend to develop a new operating system for desktop computers called Hydra.
+// CONTEXT:
+// The development of several applications that use similar programming interfaces that build on the same core functionality.
+// PROBLEM:
+// Developing software for an application domain that needs to cope with a broad spectrum of similar standards and technologies is a nontrivial task.
+// forces:
+// - The application platform must cope with continuous hardware and software evolution.
+// - The application platform should be portable, extensible and adaptable to allow easy integration of emerging technologies.
+// - The applications in your domain need to support different, but similar, application platforms.
+// - The applications may be categorized into groups that use the same functional core in different ways, requiring the underlying application platform to emulate existing standards.
+// - The functional core of the application platform should be separated into a component with minimal memory size, and services that consume as little processing power as possible.
+// SOLUTION:
+// Encapsulate the fundamental services of your application platform in a microkernel component.
+// External servers implement their own view of the underlying microkernel.
+// Clients communicate with external servers by using the communication facilities provided by the microkernel.
+// STRUCTURE:
+// - Internal servers
+// - External servers
+// - Adapters
+// - Clients
+// - Microkernel
+// class: Microkernel
+// Responsibility:
+// -Provides core mechanisms.
+// - Offers communication facilities.
+// - Encapsulates system dependencies.
+// - Manages and controls resources.
+// Collaborators:
+// - Internal Server
+
+// An internal server - also known as a subsystem - extends the functionality provided by the microkernel.
+// class: Internal Server
+// Responsibility:
+// - Implements additional services.
+// - Encapsulates some system specifics.
+// Collaborators:
+// - Microkemel
+
+// One of the design goals should be to keep the microkernel as small as possible to reduce memory requirements.Another goal is to provide mechanisms that execute quickly, to reduce service execution time.
+// use internal server for that.
+// An external seruer-also known as a personality-is a component that uses the microkernel for implementing its own view of the underlying application domain.
+
+// class: External Server
+// Resgonsibility:
+// - Provides programming interfaces for its clients.
+// Collaborators:
+// - Microkernel.
+
+// A client is an application that is associated with exactly one external server.
+// Adapters - represent these interfaces between clients and their external servers
 
 
 
