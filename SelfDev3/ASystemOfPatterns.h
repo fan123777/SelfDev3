@@ -858,9 +858,186 @@ public:
 // A client is an application that is associated with exactly one external server.
 // Adapters - represent these interfaces between clients and their external servers
 
+// class: Client
+// Responsibility: Represents an application
+// Collaborators: adapter.
 
+// class: Adapter
+// Responsibility:
+// - Hides system dependencies such as communication facilities from the client.
+// - Invokes methods of external servers on behalf of clients.
+// Collaborators:
+// - External Server
+// - Microkernel
 
+// DYNAMICS:
+// The dynamic behavlor of a Microkernel system depends on the functionality it provides for inter - process communication.
+
+// IMPLEMENTATION:
+// 1. Analyze the application domain.
+// 2. Analyze external servers.
+// 3. Categorize the services.
+// 4. Partition the categories.
+// 5. Find a consistent and complete set of operatims and abstractims for every category you identified in step 1.
+// For example, we provide services for:
+// - Creating and terminating processes and threads.
+// - Stopping and restarling them.
+// - Reading from or writing to process address spaces.
+// - Catching and handling exceptions.
+// - Managing relationships between processes or threads.
+// - Synchronizing and coordinating threads.
+// 6. Determine strategies for request transmission and retrieval.
+// Compare design patterns such as Forwarder - Receiver and Client - Dispatcher - Server for more information on the implementation of communication mechanisms.
+// 7. Structure the microkernel component.
+// If possible, design the microkernel using the Layers pattern to separate system - specific parts from system - independent parts.
+// 8. To specla the programming interfaces of the microkernel, you need to decide how these interfaces should be accessible externally.
+// 9. The microkernel is responsible for managing all system resources such as memory blocks, devices or device contexts.
+// 10. Design and implement the internal ser-uers as separate processes or shared libraries.
+// - Active servers are implemented as processes.
+// - Passive servers as shared libraries.
+// 11. Implement the external servers.
+// 12. Implement the adapters.
+// See the Proxy pattern for benefits and pitfalls of caching.
+// 13. Develop client applications or use existing ones for the ready-to-run Microkernel system.
+// EXAMPLE RESOLVED:
+// - Building an external server;
+// - Providing an adapter that is designed as a library, dynamically linked to clients
+// - implementing the internal sewers required for MacOS.
+// VARIANTS:
+// - Microkernel System with indirect Client-Server connections;
+// - Distributed Microkernel System.
+// KNOWN USES:
+// - Mach operating system;
+// - Amoeba
+// - Chorus
+// - Windows NT
+// - MKDE
+// CONSEQUENCES:
+// benfits:
+// - Portability
+// - Flexibility and Extensibility
+// - Separation of policy and mechanism
+// - Scalability
+// - Reliability.
+// - Transparency.
+// liabilities:
+// - Perjiormance
+// - Complexity of design and implementation.
+// SEE ALSO:
+// - Broker, Reflection, Layers.
+// The lowest layer includes the database management system.
+// The middle layer contains the business logic.
+// The highest layer comprises different business applications.
+
+// Reflection.
+// The Reflectton architectural pattern provldes a mechanism for changing structure and behavior of software systems dynamically
+// A meta level provides information about selected system properties and makes the software self - aware. A base level includes the application logic.
+// ALSO KNOWN AS:
+// Open Implementation, Meta-Level Architecture.
+// EXAMPLE:
+// Consider a C++ application that needs to write objects to disk and read them in again.
+// CONTEXT:
+// Building systems that support their own modification a priori.
+// PROBLEM:
+// forces:
+// - Changing software is tedious, error prone, and often expensive.
+// - Adaptable software systems usually have a complex inner structure.
+// - The more techniques that are necessary for keeping a system changeable, such as parameterization, subclassing, mix - ins, oreven copy and paste, the more awkward and complex its modification becomes.
+// - Changes can be of any scale.
+// - Even fundamental aspects of software systems can change.
+// SOLUTION:
+// - Make the software self-aware, and make selected aspects of its structure and behavior accessible for adaptation and change.
+// This leads to an architecture that is split into two major parts : a meta level and a base level.
+// An interface is specified for manipulating the metaobjects.It is called the metaobject protocol.
+// STRUCTURE:
+// The meta level consists of a set of metaobjects. There are three sources for such information :
+// - It can be provided by the run-time environment of the system, such as C++ type identification objects.
+// - It can be user-defined, such as the function call mechanism in the previous section.
+// - It can be retrieved from the base level at run-time, for example information about the current state of computation
+// The base level models and implements the application logic of the software.
+
+// class: Base Level
+// Responsibility:
+// - Implements the application logic.
+// - Uses information provided by the meta level.
+// Collaborators:
+// - Meta level.
+
+// class: Meta Level.
+// Responsibility:
+// Encapsulates system internals that may change.
+// Provides an interface to facilitate modifications to the meta - level. 
+// Collaborators: Base Level
+// class: Metaobject Protocol
+// Responsibility:
+// - Offers an interface for specifying changes to the meta level
+// - Performs specified changes
+// Collaboratots:
+// - Meta Level
+// - Base Level
+
+// DYNAMICS:
+
+// IMPLEMENTATION:
+// 1. Define a model of the application.
+// - Which services should the software provide ?
+// - Which components can fulfil these services ?
+// - What are the relationships between the components ?
+// - How do the components cooperate or collaborate ?
+// - What data do the components operate on ?
+// - How will the user interact with the software ?
+// 2. Identify varying behavior.
+// - Real-time constraints, such as deadlines, time-fence protocols and algorithms for detecting deadline misses.
+// - Transaction protocols, for example optimistic and pessimistic transaction control in accounting systems.
+// - Inter-process communication mechanisms, such as remote procedure calls and shared memory.
+// - Behavior in case of exceptions, for example the handling of deadline misses in real-time systems.
+// - Algorithms for application services, such as country-specific VAT calculation.
+// 3. Identify structural aspects of the system.
+// 4. Identify system services.
+// - exception handling
+// - Resource allocation
+// - Garbage collection
+// - Page swapping
+// - Object creation
+// 5. Define the metaobjects.
+// 6. Define the metaobject protocol.
+// There are two options for implementing the metaobject protocol :
+// - Integrate it with the metaobjects.Every metaobject provides those functions of the metaobject protocol that operate on it.
+// - Implement the metaobject protocol as a separate component.
+// 7. Dew the base level.
+
+// EXAMPLE RESOLVED.
+// VARIANTS:
+// - ReJection with several meta levels.
+
+// KNOWN USES:
+// - CLOS.
+// - MIP.
+// - PGen.
+// - NEDIS.
+// - OLE 2.0.
+
+// CONSEQUENCES:
+// benefits:
+// - No explicit mod$cation of source code.
+// - Changing a software system is easy.
+// - Support for many kinds of change.
+// liabilities:
+// - Modifications at the meta level may cause damage.
+// - Increased number of components.
+// - Lower efficiency.
+// - Not all potential changes to the software are supported.
+// - Not all languages support reflection.
+
+// SEE ALSO:
+// - Microkernel architectural pattern.
 
 // practice with all patterns, learn something new if needed. !!!
+	}
+
+	// Design Patterns
+	namespace chapter3
+	{
+		void main();
 	}
 }

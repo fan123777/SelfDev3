@@ -9,6 +9,7 @@ namespace system_of_patterns
 	{
 		chapter1::main();
 		chapter2::main();
+		chapter3::main();
 	}
 
 	namespace chapter1
@@ -188,6 +189,14 @@ namespace system_of_patterns
 		Controller* TableView::makeController()
 		{
 			return new TableController(this);
+		}
+	}
+
+	namespace chapter3
+	{
+		void main()
+		{
+
 		}
 	}
 }
