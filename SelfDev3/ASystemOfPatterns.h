@@ -1036,6 +1036,26 @@ public:
 	}
 
 	// Design Patterns
+	// 3.1 Introduction.
+	// Design patterns are medium-scale patterns.
+	// groups:
+	// - Structural Decomposition
+	// The Whole-Part pattern.
+	// - Organization of Work.
+	// Master-Slave pattern.
+	// - Access Control.
+	// Proxy pattern.
+	// - Management.
+	// the Command Processor pattern, View Handler pattern
+	// - Communication.
+	// the Forwarder-Receiver pattern, Client-Dispatcher-Server pattern, The Publisher-Subscriber(Event Channel variant).
+
+	// 3.2 Structural Decomposition.
+	// THE WHOLE - PART DESIGN PATTERN.
+
+
+
+
 	namespace chapter3
 	{
 		void main();
